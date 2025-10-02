@@ -1,88 +1,42 @@
 <?php
-
 /**
- * Vue Entête
- *
- * PHP Version 8
- *
- * @category  PPE
- * @package   GSB
- * @author    Réseau CERTA <contact@reseaucerta.org>
- * @author    José GIL <jgil@ac-nice.fr>
- * @copyright 2017 Réseau CERTA
- * @license   Réseau CERTA
- * @version   GIT: <0>
- * @link      http://www.reseaucerta.org Contexte « Laboratoire GSB »
- * @link      https://getbootstrap.com/docs/3.3/ Documentation Bootstrap v3
+ * Entête + Layout principal avec sidebar (Bootstrap 5.3)
  */
-
+$uc = filter_input(INPUT_GET, 'uc', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
 ?>
 <!DOCTYPE html>
-<html>
-    <head>
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta charset="UTF-8">
-        <title>Intranet du Laboratoire Galaxy-Swiss Bourdin</title> 
-        <meta name="description" content="">
-        <meta name="author" content="">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link href="./styles/bootstrap/bootstrap.css" rel="stylesheet">
-        <link href="./styles/style.css" rel="stylesheet">
-    </head>
-    <body>
-        <div class="container">
-            <?php
-            $uc = filter_input(INPUT_GET, 'uc', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-            if ($estConnecte) {
-                ?>
-            <div class="header">
-                <div class="row vertical-align">
-                    <div class="col-md-4">
-                        <h1>
-                            <img src="./images/logo.jpg" class="img-responsive" 
-                                 alt="Laboratoire Galaxy-Swiss Bourdin" 
-                                 title="Laboratoire Galaxy-Swiss Bourdin">
-                        </h1>
-                    </div>
-                    <div class="col-md-8">
-                        <ul class="nav nav-pills pull-right" role="tablist">
-                            <li <?php if (!$uc || $uc == 'accueil') { ?>class="active" <?php } ?>>
-                                <a href="index.php">
-                                    <span class="glyphicon glyphicon-home"></span>
-                                    Accueil
-                                </a>
-                            </li>
-                            <li <?php if ($uc == 'gererFrais') { ?>class="active"<?php } ?>>
-                                <a href="index.php?uc=gererFrais&action=saisirFrais">
-                                    <span class="glyphicon glyphicon-pencil"></span>
-                                    Renseigner la fiche de frais
-                                </a>
-                            </li>
-                            <li <?php if ($uc == 'etatFrais') { ?>class="active"<?php } ?>>
-                                <a href="index.php?uc=etatFrais&action=selectionnerMois">
-                                    <span class="glyphicon glyphicon-list-alt"></span>
-                                    Afficher mes fiches de frais
-                                </a>
-                            </li>
-                            <li 
-                            <?php if ($uc == 'deconnexion') { ?>class="active"<?php } ?>>
-                                <a href="index.php?uc=deconnexion&action=demandeDeconnexion">
-                                    <span class="glyphicon glyphicon-log-out"></span>
-                                    Déconnexion
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Intranet du Laboratoire Galaxy-Swiss Bourdin</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Bootstrap 5.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+          crossorigin="anonymous">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
+          rel="stylesheet">
+    <!-- Styles personnalisés -->
+    <link href="./styles/style.css" rel="stylesheet">
+</head>
+<body class="d-flex flex-column">
+<div class="app-wrapper">
+    <?php if ($estConnecte) {
+        include __DIR__ . '/partials/v_sidebar.php';
+    } ?>
+    <main class="app-main">
+        <?php if (!$estConnecte) { ?>
+            <div class="text-center mb-4">
+                <img src="./images/logo.jpg"
+                     class="img-fluid d-block mx-auto"
+                     alt="Laboratoire Galaxy-Swiss Bourdin"
+                     style="max-height:120px;">
             </div>
-            <?php
-            } else {
-                ?>   
-                <h1>
-                    <img src="./images/logo.jpg"
-                         class="img-responsive center-block"
-                         alt="Laboratoire Galaxy-Swiss Bourdin"
-                         title="Laboratoire Galaxy-Swiss Bourdin">
-                </h1>
-                <?php
-            }
+        <?php } else { ?>
+            <!-- Bouton toggle (mobile) -->
+            <button class="btn btn-outline-secondary sidebar-toggle-btn" id="sidebarToggle" type="button">
+                <i class="bi bi-list"></i> Menu
+            </button>
+        <?php } ?>

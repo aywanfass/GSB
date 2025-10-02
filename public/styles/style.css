@@ -1,34 +1,244 @@
-html {
-  position: relative;
+/* ==== Base layout adjustments ==== */
+html, body {
+  height: 100%;
   min-height: 100%;
 }
+
 body {
-  margin-bottom: 60px; /* Margin bottom by footer height */
+  margin: 0;
+  /* Le footer est géré par le flex layout (min-vh-100 + mt-auto) */
+  background-color: var(--bs-body-bg);
+  color: var(--bs-body-color);
 }
-.header {
-    margin-top: 10px;
+
+/* Wrapper principal (si utilisé) */
+.app-wrapper {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: row;
 }
-.footer {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  height: 60px; /* Set the fixed height of the footer here */
-  background-color: #f5f5f5;
+
+/* ==== Ancienne palette Bootstrap 3 réappliquée ==== */
+:root {
+  --bs-primary: #337ab7;
+  --bs-primary-rgb: 51, 122, 183;
+
+  --bs-success: #5cb85c;
+  --bs-success-rgb: 92, 184, 92;
+
+  --bs-info: #5bc0de;
+  --bs-info-rgb: 91, 192, 222;
+
+  --bs-warning: #f0ad4e;
+  --bs-warning-rgb: 240, 173, 78;
+
+  --bs-danger: #d9534f;
+  --bs-danger-rgb: 217, 83, 79;
+
+  /* Lien par défaut adapté */
+  --bs-link-color: #337ab7;
+  --bs-link-hover-color: #23527c;
 }
-body > .container {
-  padding: 60px 15px 25px;
+
+/* Ajustement boutons pour se rapprocher des rendus v3 */
+.btn-primary {
+  --bs-btn-bg: #337ab7;
+  --bs-btn-border-color: #2e6da4;
+  --bs-btn-hover-bg: #286090;
+  --bs-btn-hover-border-color: #204d74;
+  --bs-btn-active-bg: #204d74;
+  --bs-btn-active-border-color: #122b40;
 }
-.container .text-muted {
-  margin: 20px 0;
+
+.btn-success {
+  --bs-btn-bg: #5cb85c;
+  --bs-btn-border-color: #4cae4c;
+  --bs-btn-hover-bg: #449d44;
+  --bs-btn-hover-border-color: #398439;
+  --bs-btn-active-bg: #398439;
+  --bs-btn-active-border-color: #255625;
 }
-.footer > .container {
-  padding-right: 15px;
-  padding-left: 15px;
+
+.btn-info {
+  --bs-btn-bg: #5bc0de;
+  --bs-btn-border-color: #46b8da;
+  --bs-btn-hover-bg: #31b0d5;
+  --bs-btn-hover-border-color: #269abc;
+  --bs-btn-active-bg: #269abc;
+  --bs-btn-active-border-color: #1b6d85;
 }
+
+.btn-warning {
+  --bs-btn-bg: #f0ad4e;
+  --bs-btn-border-color: #eea236;
+  --bs-btn-hover-bg: #ec971f;
+  --bs-btn-hover-border-color: #d58512;
+  --bs-btn-active-bg: #d58512;
+  --bs-btn-active-border-color: #985f0d;
+}
+
+.btn-danger {
+  --bs-btn-bg: #d9534f;
+  --bs-btn-border-color: #d43f3a;
+  --bs-btn-hover-bg: #c9302c;
+  --bs-btn-hover-border-color: #ac2925;
+  --bs-btn-active-bg: #ac2925;
+  --bs-btn-active-border-color: #761c19;
+}
+
+/* Alertes (légère adaptation pour nuance v3) */
+.alert-info {
+  color: #31708f;
+  background-color: #d9edf7;
+  border-color: #bcdff1;
+}
+.alert-info hr { border-top-color: #a6d5ec; }
+.alert-info .alert-link { color: #245269; }
+
+.alert-warning {
+  color: #8a6d3b;
+  background-color: #fcf8e3;
+  border-color: #faf2cc;
+}
+.alert-danger {
+  color: #a94442;
+  background-color: #f2dede;
+  border-color: #ebcccc;
+}
+.alert-success {
+  color: #3c763d;
+  background-color: #dff0d8;
+  border-color: #d0e9c6;
+}
+
+/* Liens */
+a {
+  color: var(--bs-link-color);
+  text-decoration: none;
+}
+a:hover {
+  color: var(--bs-link-hover-color);
+  text-decoration: underline;
+}
+
+/* ==== Simulation d’anciens "panels" via cards ==== */
+.card-panel-primary {
+  border: 1px solid #337ab7;
+}
+.card-panel-primary > .card-header {
+  background-color: #337ab7;
+  color: #fff;
+  font-weight: 600;
+}
+
+.card-panel-info {
+  border: 1px solid #5bc0de;
+}
+.card-panel-info > .card-header {
+  background-color: #5bc0de;
+  color: #fff;
+  font-weight: 600;
+}
+
+.card-panel-success {
+  border: 1px solid #5cb85c;
+}
+.card-panel-success > .card-header {
+  background-color: #5cb85c;
+  color: #fff;
+  font-weight: 600;
+}
+
+.card-panel-warning {
+  border: 1px solid #f0ad4e;
+}
+.card-panel-warning > .card-header {
+  background-color: #f0ad4e;
+  color: #fff;
+  font-weight: 600;
+}
+
+.card-panel-danger {
+  border: 1px solid #d9534f;
+}
+.card-panel-danger > .card-header {
+  background-color: #d9534f;
+  color: #fff;
+  font-weight: 600;
+}
+
+/* Sidebar styles (déjà fournis précédemment) */
+.app-sidebar {
+  width: 250px;
+  background-color: var(--bs-body-bg);
+  border-right: 1px solid var(--bs-border-color);
+  transition: transform .25s ease;
+}
+.app-sidebar .nav-link {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  font-weight: 500;
+  color: var(--bs-body-color);
+  border-radius: .375rem;
+}
+.app-sidebar .nav-link.active {
+  background: var(--bs-primary);
+  color: #fff;
+}
+.app-sidebar .nav-link:not(.active):hover {
+  background: rgba(var(--bs-primary-rgb), 0.12);
+}
+
+/* Main area */
+.app-main {
+  flex: 1;
+  padding: 2rem 2rem 3rem;
+}
+
+.sidebar-toggle-btn {
+  display: none;
+  margin-bottom: 1rem;
+}
+
+@media (max-width: 991.98px) {
+  .app-sidebar {
+    position: fixed;
+    top: 0; left: 0;
+    height: 100vh;
+    z-index: 1050;
+    transform: translateX(-100%);
+  }
+  .app-sidebar.sidebar-open {
+    transform: translateX(0);
+    box-shadow: 0 .5rem 1rem rgba(0,0,0,.15);
+  }
+  .sidebar-backdrop {
+    display: none;
+  }
+  .sidebar-backdrop.active {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.4);
+    z-index: 1045;
+  }
+  .sidebar-toggle-btn {
+    display: inline-flex;
+  }
+  .app-main {
+    padding: 1.5rem 1rem 2.5rem;
+  }
+}
+
+/* Footer */
 footer .container p {
-	text-align: center;
-	color: #337ab7;
+  text-align: center;
+  color: #337ab7;
+  margin: 0;
 }
+
+/* Code inline */
 code {
   font-size: 80%;
 }

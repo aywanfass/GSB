@@ -1,29 +1,35 @@
 <?php
-
 /**
- * Vue Pied de page
- *
- * PHP Version 8
- *
- * @category  PPE
- * @package   GSB
- * @author    Réseau CERTA <contact@reseaucerta.org>
- * @author    José GIL <jgil@ac-nice.fr>
- * @copyright 2017 Réseau CERTA
- * @license   Réseau CERTA
- * @version   GIT: <0>
- * @link      http://www.reseaucerta.org Contexte « Laboratoire GSB »
- * @link      https://getbootstrap.com/docs/3.3/ Documentation Bootstrap v3
+ * Pied de page (Bootstrap 5.3 + sidebar layout)
  */
-
 ?>
-        </div>
-		<footer class="footer">
-			<div class="container">
-				<p class="text-muted">© GSB 2026</p>
-			</div>
-		</footer>
-    </body>
+    </main>
+</div>
+<footer class="mt-auto py-3 bg-light border-top">
+    <div class="container text-center">
+        <p class="text-muted mb-0">© GSB 2026</p>
+    </div>
+</footer>
+<!-- Bootstrap Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+<script>
+/* Toggle Sidebar (mobile) */
+(function () {
+    const toggleBtn = document.getElementById('sidebarToggle');
+    const sidebar = document.getElementById('sidebar');
+    const backdrop = document.getElementById('sidebarBackdrop');
+    if (toggleBtn && sidebar) {
+        function toggleSidebar() {
+            sidebar.classList.toggle('sidebar-open');
+            backdrop.classList.toggle('active');
+            document.body.classList.toggle('overflow-hidden');
+        }
+        toggleBtn.addEventListener('click', toggleSidebar);
+        backdrop.addEventListener('click', toggleSidebar);
+    }
+})();
+</script>
+</body>
 </html>
-
-

@@ -1,58 +1,32 @@
 <?php
-
 /**
- * Vue Liste des mois
- *
- * PHP Version 8
- *
- * @category  PPE
- * @package   GSB
- * @author    Réseau CERTA <contact@reseaucerta.org>
- * @author    José GIL <jgil@ac-nice.fr>
- * @copyright 2017 Réseau CERTA
- * @license   Réseau CERTA
- * @version   GIT: <0>
- * @link      http://www.reseaucerta.org Contexte « Laboratoire GSB »
- * @link      https://getbootstrap.com/docs/3.3/ Documentation Bootstrap v3
+ * Vue Liste des mois (Bootstrap 5.3)
  */
-
 ?>
 <h2>Mes fiches de frais</h2>
 <div class="row">
     <div class="col-md-4">
-        <h3>Sélectionner un mois : </h3>
+        <h3>Sélectionner un mois :</h3>
     </div>
     <div class="col-md-4">
-        <form action="index.php?uc=etatFrais&action=voirEtatFrais" 
-              method="post" role="form">
-            <div class="form-group">
-                <label for="lstMois" accesskey="n">Mois : </label>
-                <select id="lstMois" name="lstMois" class="form-control">
-                    <?php
-                    foreach ($lesMois as $unMois) {
+        <form action="index.php?uc=etatFrais&action=voirEtatFrais" method="post">
+            <div class="mb-3">
+                <label for="lstMois" class="form-label" accesskey="n">Mois :</label>
+                <select id="lstMois" name="lstMois" class="form-select">
+                    <?php foreach ($lesMois as $unMois) {
                         $mois = $unMois['mois'];
                         $numAnnee = $unMois['numAnnee'];
                         $numMois = $unMois['numMois'];
-                        if ($mois == $moisASelectionner) {
-                            ?>
-                            <option selected value="<?php echo $mois ?>">
-                                <?php echo $numMois . '/' . $numAnnee ?> </option>
-                            <?php
-                        } else {
-                            ?>
-                            <option value="<?php echo $mois ?>">
-                                <?php echo $numMois . '/' . $numAnnee ?> </option>
-                            <?php
-                        }
-                    }
-                    ?>    
-
+                        $selected = ($mois == $moisASelectionner) ? 'selected' : '';
+                        ?>
+                        <option value="<?php echo htmlspecialchars($mois); ?>" <?php echo $selected; ?>>
+                            <?php echo htmlspecialchars($numMois . '/' . $numAnnee); ?>
+                        </option>
+                    <?php } ?>
                 </select>
             </div>
-            <input id="ok" type="submit" value="Valider" class="btn btn-success" 
-                   role="button">
-            <input id="annuler" type="reset" value="Effacer" class="btn btn-danger" 
-                   role="button">
+            <button id="ok" type="submit" class="btn btn-success me-2">Valider</button>
+            <button id="annuler" type="reset" class="btn btn-danger">Effacer</button>
         </form>
     </div>
 </div>

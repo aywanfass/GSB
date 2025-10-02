@@ -1,54 +1,40 @@
 <?php
-
 /**
- * Vue Accueil
- *
- * PHP Version 8
- *
- * @category  PPE
- * @package   GSB
- * @author    Réseau CERTA <contact@reseaucerta.org>
- * @author    José GIL <jgil@ac-nice.fr>
- * @copyright 2017 Réseau CERTA
- * @license   Réseau CERTA
- * @version   GIT: <0>
- * @link      http://www.reseaucerta.org Contexte « Laboratoire GSB »
+ * Accueil (intégré dans le layout sidebar)
  */
-
 ?>
-<div class="alert alert-warning" role="alert"><strong>Rappel : </strong>Vos frais sont à déclarer au plus tard le dernier jour du mois 
-	et vos factures acquittées doivent être arrivées aux services comptables au plus tard le 10 du mois suivant la saisie.
-	Les éléments reçus après le 10 seront reportés sur le mois suivant.
+<div class="alert alert-warning" role="alert">
+    <strong>Rappel :</strong> Vos frais doivent être saisis avant la fin du mois. Factures reçues après le 10 → mois suivant.
 </div>
-<div id="accueil">
-    <h2>
-        Gestion des frais<small> - Visiteur : 
-            <?= $_SESSION['prenom'] . ' ' . $_SESSION['nom'] ?></small>
-    </h2>
-</div>
-<div class="row">
-    <div class="col-md-12">
-        <div class="panel panel-primary">
-            <div class="panel-heading">
-                <h3 class="panel-title">
-                    <span class="glyphicon glyphicon-bookmark"></span>
-                    Navigation
-                </h3>
-            </div>
-            <div class="panel-body">
-                <div class="row">
-                    <div class="col-xs-12 col-md-12">
-                        <a href="index.php?uc=gererFrais&action=saisirFrais"
-                           class="btn btn-success btn-lg" role="button">
-                            <span class="glyphicon glyphicon-pencil"></span>
-                            <br>Renseigner la fiche de frais</a>
-                        <a href="index.php?uc=etatFrais&action=selectionnerMois"
-                           class="btn btn-primary btn-lg" role="button">
-                            <span class="glyphicon glyphicon-list-alt"></span>
-                            <br>Afficher mes fiches de frais</a>
-                    </div>
+<h2 class="h4 mb-4">
+    Gestion des frais
+    <small class="text-muted d-block d-sm-inline">
+        Visiteur : <?= htmlspecialchars($_SESSION['prenom'] . ' ' . $_SESSION['nom']) ?>
+    </small>
+</h2>
+<div class="row g-3">
+    <div class="col-md-6 col-lg-4">
+        <a href="index.php?uc=gererFrais&action=saisirFrais" class="text-decoration-none">
+            <div class="card h-100 border-success">
+                <div class="card-body">
+                    <h5 class="card-title text-success">
+                        <i class="bi bi-pencil-square me-1"></i> Fiche de frais
+                    </h5>
+                    <p class="card-text small mb-0">Renseigner les frais du mois en cours.</p>
                 </div>
             </div>
-        </div>
+        </a>
+    </div>
+    <div class="col-md-6 col-lg-4">
+        <a href="index.php?uc=etatFrais&action=selectionnerMois" class="text-decoration-none">
+            <div class="card h-100 border-primary">
+                <div class="card-body">
+                    <h5 class="card-title text-primary">
+                        <i class="bi bi-card-list me-1"></i> Mes fiches
+                    </h5>
+                    <p class="card-text small mb-0">Consulter l’historique et le statut.</p>
+                </div>
+            </div>
+        </a>
     </div>
 </div>
