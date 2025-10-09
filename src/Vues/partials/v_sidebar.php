@@ -2,14 +2,14 @@
 /**
  * Sidebar de navigation (Bootstrap 5.3)
  * Utilise Bootstrap Icons.
- * Variables disponibles : $uc (use-case courant)
+ * Variables disponibles : $uc (use-case courant);   
  */
 ?>
-<nav id="sidebar" class="app-sidebar p-3">
+<nav id="sidebar" class="app-sidebar p-3">   
     <h5 class="d-flex align-items-center mb-3">
-        <i class="bi bi-diagram-3-fill me-2 text-primary"></i>
-        <span>GSB Intranet</span>
+        <img src="./images/logo.jpg" class="img-fluid d-block mx-auto" alt="Laboratoire Galaxy-Swiss Bourdin" style="max-height:75px;">
     </h5>
+    
     <hr>
     <ul class="nav nav-pills flex-column mb-auto">
         <li class="nav-item">

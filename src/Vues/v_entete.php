@@ -21,7 +21,7 @@ $uc = filter_input(INPUT_GET, 'uc', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
     <!-- Styles personnalisés -->
     <link href="./styles/style.css" rel="stylesheet">
 </head>
-<body class="d-flex flex-column">
+<body class="flex-column">
 <div class="app-wrapper">
     <?php if ($estConnecte) {
         include __DIR__ . '/partials/v_sidebar.php';

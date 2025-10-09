@@ -6,7 +6,6 @@ html, body {
 
 body {
   margin: 0;
-  /* Le footer est géré par le flex layout (min-vh-100 + mt-auto) */
   background-color: var(--bs-body-bg);
   color: var(--bs-body-color);
 }
