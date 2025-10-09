@@ -250,4 +250,33 @@ abstract class Utilitaires
             return count($_REQUEST['erreurs']);
         }
     }
+    
+     public static function setRole(?string $roleId): void
+    {
+        $_SESSION['role'] = $roleId;
+    }
+
+    public static function getRole(): ?string
+    {
+        return $_SESSION['role'] ?? null;
+    }
+
+    public static function hasRole(string $roleId): bool
+    {
+        return self::getRole() === $roleId;
+    }
+
+    /**
+     * Exige un ou plusieurs rôles; 403 si non autorisé.
+     */
+    public static function exigerRole(string|array $roles): void
+    {
+        $roles = (array)$roles;
+        if (!in_array(self::getRole(), $roles, true)) {
+            header('HTTP/1.1 403 Forbidden');
+            echo 'Accès refusé';
+            exit;
+        }
+    }
+
 }

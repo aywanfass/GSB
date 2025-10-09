@@ -9,7 +9,6 @@
     <h5 class="d-flex align-items-center mb-3">
         <img src="./images/logo.jpg" class="img-fluid d-block mx-auto" alt="Laboratoire Galaxy-Swiss Bourdin" style="max-height:75px;">
     </h5>
-    qcddsvrebb
     <hr>
     <ul class="nav nav-pills flex-column mb-auto">
         <li class="nav-item">
