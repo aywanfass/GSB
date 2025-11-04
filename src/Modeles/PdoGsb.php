@@ -79,42 +79,28 @@ class PdoGsb {
     }
 
     /**
-     * Retourne les informations d'un visiteur
+     * Retourne les informations d'un visiteur (avec son rôle)
      *
      * @param String $login Login du visiteur
      * @param String $mdp   Mot de passe du visiteur
      *
-     * @return l'id, le nom et le prénom sous la forme d'un tableau associatif
+     * @return array id, nom, prenom, role_id, role_libelle
      */
     public function getInfosVisiteur($login, $mdp): array {
         $requetePrepare = $this->connexion->prepare(
-                'SELECT visiteur.id AS id, visiteur.nom AS nom, '
-                . 'visiteur.prenom AS prenom '
-                . 'FROM visiteur '
-                . 'WHERE visiteur.login = :unLogin AND visiteur.mdp = :unMdp'
+                'SELECT v.id AS id,
+                v.nom AS nom,
+                v.prenom AS prenom,
+                v.id_role AS id_role,
+                r.libelle AS role_libelle
+                FROM visiteur v
+                LEFT JOIN role r ON r.id = v.id_role
+                WHERE v.login = :unLogin AND v.mdp = :unMdp'
         );
         $requetePrepare->bindParam(':unLogin', $login, PDO::PARAM_STR);
         $requetePrepare->bindParam(':unMdp', $mdp, PDO::PARAM_STR);
         $requetePrepare->execute();
-        return $requetePrepare->fetch();
-    }
-
-    /**
-     * Retourne les rôles d'un visiteur
-     *
-     * @param string $idVisiteur
-     * @return array [['id'=>'COMPT','libelle'=>'Comptable'], ...]
-     */
-    public function getRolesByVisiteur(string $idVisiteur): array {
-        $sql = 'SELECT r.id, r.libelle
-            FROM role r
-            INNER JOIN visiteur v ON r.id = v.id_role
-            WHERE v.idVisiteur = :idVisiteur
-            ORDER BY r.id';
-        $stmt = $this->connexion->prepare($sql);
-        $stmt->bindParam(':idVisiteur', $idVisiteur, PDO::PARAM_STR);
-        $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        return $requetePrepare->fetch() ?: [];
     }
 
     /**
