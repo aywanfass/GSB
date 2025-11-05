@@ -50,7 +50,7 @@ $role = $_SESSION['role'] ?? null;
     </h2>
     <div class="row g-3">
         <div class="col-md-6 col-lg-4">
-            <a href="index.php?uc=gererFrais&action=saisirFrais" class="text-decoration-none">
+            <a href="index.php?uc=comptable&action=validerFiches" class="text-decoration-none">
                 <div class="card h-100 border-warning">
                     <div class="card-body">
                         <h5 class="card-title text-warning">
@@ -62,7 +62,7 @@ $role = $_SESSION['role'] ?? null;
             </a>
         </div>
         <div class="col-md-6 col-lg-4">
-            <a href="index.php?uc=etatFrais&action=selectionnerMois" class="text-decoration-none">
+            <a href="index.php?uc=comptable&action=suivrePaiement" class="text-decoration-none">
                 <div class="card h-100 border-warning">
                     <div class="card-body">
                         <h5 class="card-title text-warning">

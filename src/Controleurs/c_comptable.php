@@ -5,19 +5,18 @@ use Outils\Utilitaires;
 // Interdire l'accès aux non-comptables
 Utilitaires::exigerRole('COMPT');
 
-$action = filter_input(INPUT_GET, 'action', FILTER_SANITIZE_FULL_SPECIAL_CHARS) ?: 'tableauBord';
+$action = filter_input(INPUT_GET, 'action', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
 
 switch ($action) {
-    case 'tableauBord':
-        // Ici, chargez vos données (ex: fiches à valider)
-        include PATH_VIEWS . 'v_comptable_dashboard.php';
+    case 'validerFiches':
+        include PATH_VIEWS . 'v_comptable_validation.php';
         break;
 
-    // Exemples d'autres actions:
-    // case 'validerFiche': ...
-    // case 'rembourserFiche': ...
+    case 'suivrePaiement':
+        include PATH_VIEWS . 'v_comptable_suivre_paiement.php';
+        break;
 
     default:
-        include PATH_VIEWS . 'v_comptable_dashboard.php';
+        include PATH_VIEWS . 'v_acceuil.php';
         break;
 }
