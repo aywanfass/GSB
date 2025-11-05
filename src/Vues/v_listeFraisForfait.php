@@ -40,7 +40,7 @@
 <?php else : ?>
     <div class="row">
         <div class="col-md-8">
-            <form class="row g-3 align-items-center mb-4" method="get" action="index.php">
+            <form class="row g-3 align-items-center mb-4" method="get" action="index.php?uc=comptable&action=validerFiches">
                 <input type="hidden" name="uc" value="gererFrais">
                 <input type="hidden" name="action" value="validerFiches">
                 <div class="col-auto d-flex align-items-center">

@@ -27,14 +27,14 @@ $role = $_SESSION['role'] ?? null;
             <li class="nav-item">
                 <a href="index.php?uc=comptable&action=validerFiches"
                    class="nav-link <?php echo ($uc === 'comptable' && $action === 'validerFiches') ? 'active bg-warning ' : 'text-warning'; ?>">
-                    <i class="bi bi-check2-square"></i>
+                    <i class="bi bi-check"></i>
                     Valider les fiches de frais
                 </a>
             </li>
             <li class="nav-item">
                 <a href="index.php?uc=comptable&action=suivrePaiement"
                    class="nav-link <?php echo ($uc === 'comptable' && $action === 'suivrePaiement') ? 'active bg-warning ' : 'text-warning'; ?>">
-                    <i class="bi bi-cash-stack"></i>
+                    <i class="bi bi-currency-euro"></i>
                     Suivre le paiement des fiches de frais
                 </a>
             </li>
