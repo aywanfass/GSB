@@ -3,6 +3,7 @@
  * Vue Liste des frais hors forfait (Bootstrap 5.3)
  */
 ?>
+<?php if ($role === 'VIS') : ?>
 <hr>
 <div class="row">
     <div class="col-12">
@@ -69,3 +70,47 @@
         </form>
     </div>
 </div>
+<?php else : ?>
+<hr class="border-secondary">
+<div class="row">
+    <div class="col-12">
+        <div class="card border-warning mb-4">
+            <div class="card-header bg-warning text-white">
+                Descriptif des éléments hors forfait
+            </div>
+            <div class="table-responsive">
+                <table class="table table-bordered align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Date</th>
+                            <th>Libellé</th>
+                            <th>Montant</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <?php foreach ($lesFraisHorsForfait as $unFraisHorsForfait) {
+                        $libelle = htmlspecialchars($unFraisHorsForfait['libelle']);
+                        $date = htmlspecialchars($unFraisHorsForfait['date']);
+                        $montant = htmlspecialchars($unFraisHorsForfait['montant']);
+                        $id = $unFraisHorsForfait['id']; ?>
+                        <tr>
+                            <td><?php echo $date; ?></td>
+                            <td><?php echo $libelle; ?></td>
+                            <td><?php echo $montant; ?></td>
+                            <td>
+                                <a class="btn btn-sm btn-outline-danger"
+                                   href="index.php?uc=gererFrais&action=supprimerFrais&idFrais=<?php echo urlencode($id); ?>"
+                                   onclick="return confirm('Voulez-vous vraiment supprimer ce frais ?');">
+                                    Supprimer
+                                </a>
+                            </td>
+                        </tr>
+                    <?php } ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<?php endif; ?>

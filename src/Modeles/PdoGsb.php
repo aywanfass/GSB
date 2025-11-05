@@ -102,7 +102,16 @@ class PdoGsb {
         $requetePrepare->execute();
         return $requetePrepare->fetch() ?: [];
     }
-
+    
+    public function getTousLesVisiteurs():array {
+        $requetePrepare = $this->connexion->prepare(
+                'SELECT *
+                FROM visiteur as v'
+        );
+        $requetePrepare->execute();
+        return $requetePrepare->fetchAll();
+    }
+    
     /**
      * Retourne sous forme d'un tableau associatif toutes les lignes de frais
      * hors forfait concernées par les deux arguments.
