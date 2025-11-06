@@ -1,68 +1,80 @@
 <?php
+
 /**
- * Vue État de Frais (Bootstrap 5.3)
+ * Vue État de Frais
+ *
+ * PHP Version 8
+ *
+ * @category  PPE
+ * @package   GSB
+ * @author    Réseau CERTA <contact@reseaucerta.org>
+ * @author    José GIL <jgil@ac-nice.fr>
+ * @copyright 2017 Réseau CERTA
+ * @license   Réseau CERTA
+ * @version   GIT: <0>
+ * @link      http://www.reseaucerta.org Contexte « Laboratoire GSB »
+ * @link      https://getbootstrap.com/docs/3.3/ Documentation Bootstrap v3
  */
+
 ?>
 <hr>
-<div class="card border-primary mb-4">
-    <div class="card-header bg-primary text-white">
-        Fiche de frais du mois <?php echo htmlspecialchars($numMois . '-' . $numAnnee); ?>
-    </div>
-    <div class="card-body">
-        <p class="mb-1">
-            <strong>État :</strong> <?php echo htmlspecialchars($libEtat); ?>
-            depuis le <?php echo htmlspecialchars($dateModif); ?>
-        </p>
-        <p class="mb-0">
-            <strong>Montant validé :</strong> <?php echo htmlspecialchars($montantValide); ?>
-        </p>
-    </div>
-</div>
-
-<div class="card border-info mb-4">
-    <div class="card-header bg-info text-white">Éléments forfaitisés</div>
-    <div class="table-responsive">
-        <table class="table table-bordered align-middle mb-0">
-            <thead class="table-light">
-                <tr>
-                    <?php foreach ($lesFraisForfait as $unFraisForfait) { ?>
-                        <th><?php echo htmlspecialchars($unFraisForfait['libelle']); ?></th>
-                    <?php } ?>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <?php foreach ($lesFraisForfait as $unFraisForfait) { ?>
-                        <td class="qteForfait"><?php echo htmlspecialchars($unFraisForfait['quantite']); ?></td>
-                    <?php } ?>
-                </tr>
-            </tbody>
-        </table>
+<div class="panel panel-primary">
+    <div class="panel-heading">Fiche de frais du mois 
+        <?php echo $numMois . '-' . $numAnnee ?> : </div>
+    <div class="panel-body">
+        <strong><u>Etat :</u></strong> <?php echo $libEtat ?>
+        depuis le <?php echo $dateModif ?> <br> 
+        <strong><u>Montant validé :</u></strong> <?php echo $montantValide ?>
+        <br>
+        <a class="btn btn-default" href="telecharger_pdf.php?mois=<?php echo htmlspecialchars($leMois); ?>">
+            Télécharger PDF
+        </a>
     </div>
 </div>
-
-<div class="card border-info mb-4">
-    <div class="card-header bg-info text-white">
-        Descriptif des éléments hors forfait - <?php echo htmlspecialchars($nbJustificatifs); ?> justificatifs reçus
-    </div>
-    <div class="table-responsive">
-        <table class="table table-bordered align-middle mb-0">
-            <thead class="table-light">
-                <tr>
-                    <th>Date</th>
-                    <th>Libellé</th>
-                    <th>Montant</th>
-                </tr>
-            </thead>
-            <tbody>
-            <?php foreach ($lesFraisHorsForfait as $unFraisHorsForfait) { ?>
-                <tr>
-                    <td><?php echo htmlspecialchars($unFraisHorsForfait['date']); ?></td>
-                    <td><?php echo htmlspecialchars($unFraisHorsForfait['libelle']); ?></td>
-                    <td><?php echo htmlspecialchars($unFraisHorsForfait['montant']); ?></td>
-                </tr>
-            <?php } ?>
-            </tbody>
-        </table>
-    </div>
+<div class="panel panel-info">
+    <div class="panel-heading">Eléments forfaitisés</div>
+    <table class="table table-bordered table-responsive">
+        <tr>
+            <?php
+            foreach ($lesFraisForfait as $unFraisForfait) {
+                $libelle = $unFraisForfait['libelle']; ?>
+                <th> <?php echo htmlspecialchars($libelle) ?></th>
+                <?php
+            }
+            ?>
+        </tr>
+        <tr>
+            <?php
+            foreach ($lesFraisForfait as $unFraisForfait) {
+                $quantite = $unFraisForfait['quantite']; ?>
+                <td class="qteForfait"><?php echo $quantite ?> </td>
+                <?php
+            }
+            ?>
+        </tr>
+    </table>
+</div>
+<div class="panel panel-info">
+    <div class="panel-heading">Descriptif des éléments hors forfait - 
+        <?php echo $nbJustificatifs ?> justificatifs reçus</div>
+    <table class="table table-bordered table-responsive">
+        <tr>
+            <th class="date">Date</th>
+            <th class="libelle">Libellé</th>
+            <th class='montant'>Montant</th>                
+        </tr>
+        <?php
+        foreach ($lesFraisHorsForfait as $unFraisHorsForfait) {
+            $date = $unFraisHorsForfait['date'];
+            $libelle = htmlspecialchars($unFraisHorsForfait['libelle']);
+            $montant = $unFraisHorsForfait['montant']; ?>
+            <tr>
+                <td><?php echo $date ?></td>
+                <td><?php echo $libelle ?></td>
+                <td><?php echo $montant ?></td>
+            </tr>
+            <?php
+        }
+        ?>
+    </table>
 </div>
