@@ -135,52 +135,37 @@ class PdoGsb
      * @param string $mdp   Mot de passe soumis (clair)
      * @return array|false  Tableau ['id','nom','prenom'] si authentifié, False sinon
      */
-    public function getInfosVisiteur($login, $mdp)
+    public function getInfosVisiteur($login, $mdp): array
     {
-        if ($this->hasPasswordHashColumn()) {
-            $requetePrepare = $this->connexion->prepare(
-                'SELECT id AS id, nom AS nom, prenom AS prenom, mdp, password_hash '
-                . 'FROM visiteur WHERE login = :unLogin'
-            );
-            $requetePrepare->bindParam(':unLogin', $login, PDO::PARAM_STR);
-            $requetePrepare->execute();
-            $row = $requetePrepare->fetch();
-            if (!$row) {
-                return false; // pas de compte
-            }
-            $submittedHash = hash('sha256', $mdp);
-            if (isset($row['password_hash']) && !empty($row['password_hash'])) {
-                if (hash_equals($row['password_hash'], $submittedHash)) {
-                    return [
-                        'id' => $row['id'],
-                        'nom' => $row['nom'],
-                        'prenom' => $row['prenom']
-                    ];
-                }
-                return false; // hash présent mais non concordant
-            }
-            // Fallback ancien schéma : mot de passe en clair
-            if (isset($row['mdp']) && hash_equals($row['mdp'], $mdp)) {
-                return [
-                    'id' => $row['id'],
-                    'nom' => $row['nom'],
-                    'prenom' => $row['prenom']
-                ];
-            }
-            return false;
-        }
-        // Schéma legacy: pas de colonne password_hash
+        // Authentification en clair, récupération du rôle via jointure sur la table role
         $requetePrepare = $this->connexion->prepare(
-            'SELECT visiteur.id AS id, visiteur.nom AS nom, '
-            . 'visiteur.prenom AS prenom '
-            . 'FROM visiteur '
-            . 'WHERE visiteur.login = :unLogin AND visiteur.mdp = :unMdp'
+            'SELECT v.id AS id, v.nom AS nom, v.prenom AS prenom, '
+            . 'v.idRole AS idRole, r.libelle AS roleLibelle '
+            . 'FROM visiteur v '
+            . 'JOIN role r ON r.idRole = v.idRole '
+            . 'WHERE v.login = :unLogin AND v.mdp = :unMdp'
         );
         $requetePrepare->bindParam(':unLogin', $login, PDO::PARAM_STR);
         $requetePrepare->bindParam(':unMdp', $mdp, PDO::PARAM_STR);
         $requetePrepare->execute();
-        $res = $requetePrepare->fetch();
-        return $res ? $res : false;
+
+        $row = $requetePrepare->fetch(PDO::FETCH_ASSOC);
+        if (!$row) {
+            // Retourner un tableau vide si authentification échoue
+            return [];
+        }
+
+        // Normalisation des valeurs renvoyées
+        $row['idRole'] = isset($row['idRole']) ? strtoupper(trim((string)$row['idRole'])) : null;
+        $row['roleLibelle'] = isset($row['roleLibelle']) ? trim((string)$row['roleLibelle']) : null;
+
+        return [
+            'id' => $row['id'],
+            'nom' => $row['nom'],
+            'prenom' => $row['prenom'],
+            'idRole' => $row['idRole'],
+            'roleLibelle' => $row['roleLibelle']
+        ];
     }
 
     /**
