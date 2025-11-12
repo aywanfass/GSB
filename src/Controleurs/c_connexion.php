@@ -38,7 +38,7 @@ switch ($action) {
             $nom = $visiteur['nom'];
             $prenom = $visiteur['prenom'];
             Utilitaires::connecter($id, $nom, $prenom);
-            $roleId = $visiteur['id_role'] ?? 'VIS';
+            $roleId = $visiteur['idRole'] ?? 'VIS';
             Utilitaires::setRole($roleId);
             header('Location: index.php');
         }
