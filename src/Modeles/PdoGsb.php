@@ -137,12 +137,11 @@ class PdoGsb
      */
     public function getInfosVisiteur($login, $mdp): array
     {
-        // Authentification en clair, récupération du rôle via jointure sur la table role
         $requetePrepare = $this->connexion->prepare(
             'SELECT v.id AS id, v.nom AS nom, v.prenom AS prenom, '
-            . 'v.idRole AS idRole, r.libelle AS roleLibelle '
+            . 'v.id_role AS id_role, r.libelle AS roleLibelle '
             . 'FROM visiteur v '
-            . 'JOIN role r ON r.idRole = v.idRole '
+            . 'JOIN role r ON r.id = v.id_role '
             . 'WHERE v.login = :unLogin AND v.mdp = :unMdp'
         );
         $requetePrepare->bindParam(':unLogin', $login, PDO::PARAM_STR);
@@ -151,19 +150,18 @@ class PdoGsb
 
         $row = $requetePrepare->fetch(PDO::FETCH_ASSOC);
         if (!$row) {
-            // Retourner un tableau vide si authentification échoue
             return [];
         }
 
         // Normalisation des valeurs renvoyées
-        $row['idRole'] = isset($row['idRole']) ? strtoupper(trim((string)$row['idRole'])) : null;
+        $row['id_role'] = isset($row['id_role']) ? strtoupper(trim((string)$row['id_role'])) : null;
         $row['roleLibelle'] = isset($row['roleLibelle']) ? trim((string)$row['roleLibelle']) : null;
 
         return [
             'id' => $row['id'],
             'nom' => $row['nom'],
             'prenom' => $row['prenom'],
-            'idRole' => $row['idRole'],
+            'id_role' => $row['id_role'],
             'roleLibelle' => $row['roleLibelle']
         ];
     }
