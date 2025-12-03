@@ -1,6 +1,5 @@
 <?php ?>
-<div class="container my-4">
-    <!-- Titre -->
+<div>
     <div class="row mb-3">
         <div class="col-12">
             <h2 class="text-warning">Suivi des paiements</h2>
@@ -8,11 +7,11 @@
     </div>
 
     <!-- Filtre + Statistiques -->
-    <div class="row mb-4">
-        <div class="col-md-6">
-            <div class="card shadow-sm">
+    <div class="row mb-3">
+        <div class="">
+            <div class="card   mb-3 col-lg-3">
                 <div class="card-body">
-                    <form method="get" action="index.php" role="form" class="row gx-2 gy-2 align-items-end">
+                    <form id="chargerFicheForm" method="get" action="index.php" role="form" class="row gx-2 gy-2 align-items-end">
                         <input type="hidden" name="uc" value="suiviPaiement">
                         <input type="hidden" name="action" value="lister">
                         <div class="col-12 col-sm-8">
@@ -26,7 +25,7 @@
                                 <?php }} ?>
                             </select>
                         </div>
-                        <div class="col-12 col-sm-4 text-sm-end">
+                        <div class=" col-sm-4 text-sm-end">
                             <button class="btn btn-primary btn-sm mt-2 mt-sm-0" type="submit">Filtrer</button>
                         </div>
                     </form>
@@ -35,7 +34,7 @@
         </div>
 
         <div class="col-md-6">
-            <div class="card shadow-sm h-100">
+            <div class="card ">
                 <div class="card-body">
                     <h4 class="mb-3 small">Statistiques (<?php echo htmlspecialchars($annee ?? date('Y')); ?>)</h4>
                     <div class="table-responsive">
@@ -68,7 +67,7 @@
     <!-- Fiches validées -->
     <div class="row">
         <div class="col-12">
-            <div class="card shadow-sm">
+            <div class="  col-md-8">
                 <div class="card-body p-3">
                     <div class="table-responsive">
                         <table class="table table-sm table-bordered mb-0 align-middle border-warning">
@@ -120,3 +119,5 @@
         </div>
     </div>
 </div>
+
+<script src="/js/Menu_deroulant.js"></script>

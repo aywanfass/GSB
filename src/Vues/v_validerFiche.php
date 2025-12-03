@@ -11,6 +11,7 @@
                         <div class="col-auto ">
                             <label for="visiteur" class="form-label small mb-1">Choisir le visiteur</label>
                             <select class="form-select form-select-sm" id="visiteur" name="visiteur" required>
+                                <option value="">Choisir un visiteur</option>
                                 <?php
                                 if (isset($tousVisiteurs) && is_array($tousVisiteurs)) {
                                     foreach ($tousVisiteurs as $v) {
