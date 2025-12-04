@@ -106,10 +106,10 @@
                 <table class="table table-bordered table-sm mb-0 align-middle border-warning">
                     <thead class="bg-warning text-white">
                         <tr>
-                            <th style="width:25%;">Date</th>
-                            <th style="width:45%;">Libellé</th>
-                            <th style="width:15%;">Montant</th>
-                            <th style="width:15%;">Action</th>
+                            <th>Date</th>
+                            <th>Libellé</th>
+                            <th>Montant</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -119,18 +119,18 @@
                                 ?>
                                 <tr>
                                     <td class="align-middle">
-                                        <input type="text" class="form-control form-control-sm" value="<?php echo htmlspecialchars($hf['date']); ?>" readonly>
+                                        <?php echo htmlspecialchars($hf['date']); ?>
                                     </td>
                                     <td class="align-middle">
-                                        <input type="text" class="form-control form-control-sm" value="<?php echo htmlspecialchars($hf['libelle']); ?>" readonly>
+                                       <?php echo htmlspecialchars($hf['libelle']); ?>
                                     </td>
                                     <td class="align-middle">
-                                        <input type="text" class="form-control form-control-sm" value="<?php echo htmlspecialchars(number_format((float) $hf['montant'], 2, '.', '')); ?>" readonly>
+                                        <?php echo htmlspecialchars(number_format((float) $hf['montant'], 2, '.', '')); ?>
                                     </td>
                                     <td class="align-middle">
                                         <div class="d-flex gap-2">
-                                            <a class="btn btn-success btn-sm" href="index.php?uc=validerFiche&action=corrigerHF&idFrais=<?php echo htmlspecialchars($hf['id']); ?>&visiteur=<?php echo htmlspecialchars($idVisiteur); ?>&mois=<?php echo htmlspecialchars($mois); ?>">Corriger</a>
-                                            <a class="btn btn-danger btn-sm" href="index.php?uc=validerFiche&action=refuserHF&idFrais=<?php echo htmlspecialchars($hf['id']); ?>&visiteur=<?php echo htmlspecialchars($idVisiteur); ?>&mois=<?php echo htmlspecialchars($mois); ?>">Réinitialiser</a>
+                                            <a class="btn btn-success btn-sm text-decoration-none" href="index.php?uc=validerFiche&action=corrigerHF&idFrais=<?php echo htmlspecialchars($hf['id']); ?>&visiteur=<?php echo htmlspecialchars($idVisiteur); ?>&mois=<?php echo htmlspecialchars($mois); ?>">Corriger</a>
+                                            <a class="btn btn-danger btn-sm text-decoration-none" href="index.php?uc=validerFiche&action=refuserHF&idFrais=<?php echo htmlspecialchars($hf['id']); ?>&visiteur=<?php echo htmlspecialchars($idVisiteur); ?>&mois=<?php echo htmlspecialchars($mois); ?>">Refuser</a>
                                         </div>
                                     </td>
                                 </tr>
@@ -146,8 +146,6 @@
                 </table>
             </div>
         </div> <!-- card-body -->
-        <!-- Bas : justificatifs et boutons (boutons en dessous, espacés) -->
-
     </div>
     <div class="p-3">
         <div class="row g-2 align-items-center">
