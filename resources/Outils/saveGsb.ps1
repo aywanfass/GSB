@@ -1,0 +1,1 @@
+powershell C:\wamp64\bin\mariadb\mariadb10.10.2\bin\mysqldump.exe -u root gsb_frais > C:\sauvegardeGsb\savGsb_$(Get-Date -Format 'yyyyMMddhhmm').sql

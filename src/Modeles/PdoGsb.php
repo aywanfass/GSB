@@ -49,8 +49,6 @@ class PdoGsb
 {
     protected $connexion;
     private static $instance = null;
-    private static $hasPasswordHashCol = null;
-    private static $hasPaiementCols = null;
 
     /**
      * Constructeur privé, crée l'instance de PDO qui sera sollicitée
@@ -86,47 +84,6 @@ class PdoGsb
     }
 
     /**
-     * Vérifie si la colonne password_hash existe dans la table visiteur
-     * et mémorise le résultat pour éviter des requêtes répétées.
-     */
-    private function hasPasswordHashColumn(): bool
-    {
-        if (self::$hasPasswordHashCol !== null) {
-            return self::$hasPasswordHashCol;
-        }
-        try {
-            $stmt = $this->connexion->query("SHOW COLUMNS FROM visiteur LIKE 'password_hash'");
-            $row = $stmt->fetch();
-            self::$hasPasswordHashCol = $row ? true : false;
-        } catch (\Exception $e) {
-            self::$hasPasswordHashCol = false;
-        }
-        return self::$hasPasswordHashCol;
-    }
-
-    /**
-     * Indique si les colonnes de paiement (date_paiement, ref_paiement) existent sur fichefrais.
-     *
-     * @return bool True si les deux colonnes existent, False sinon
-     */
-    private function hasPaiementColumns(): bool
-    {
-        if (self::$hasPaiementCols !== null) {
-            return self::$hasPaiementCols;
-        }
-        try {
-            $stmt = $this->connexion->query("SHOW COLUMNS FROM fichefrais LIKE 'date_paiement'");
-            $row = $stmt->fetch();
-            $stmt2 = $this->connexion->query("SHOW COLUMNS FROM fichefrais LIKE 'ref_paiement'");
-            $row2 = $stmt2->fetch();
-            self::$hasPaiementCols = ($row && $row2) ? true : false;
-        } catch (\Exception $e) {
-            self::$hasPaiementCols = false;
-        }
-        return self::$hasPaiementCols;
-    }
-
-    /**
      * Authentifie et retourne les informations d'un visiteur.
      *
      * Si la colonne password_hash est présente: compare SHA-256; sinon fallback legacy (mdp en clair).
@@ -135,17 +92,16 @@ class PdoGsb
      * @param string $mdp   Mot de passe soumis (clair)
      * @return array|false  Tableau ['id','nom','prenom'] si authentifié, False sinon
      */
-    public function getInfosVisiteur($login, $mdp): array
+    public function getInfosVisiteur($login): array
     {
         $requetePrepare = $this->connexion->prepare(
             'SELECT v.id AS id, v.nom AS nom, v.prenom AS prenom, '
             . 'v.id_role AS id_role, r.libelle AS roleLibelle '
             . 'FROM visiteur v '
             . 'JOIN role r ON r.id = v.id_role '
-            . 'WHERE v.login = :unLogin AND v.mdp = :unMdp'
+            . 'WHERE v.login = :unLogin'
         );
         $requetePrepare->bindParam(':unLogin', $login, PDO::PARAM_STR);
-        $requetePrepare->bindParam(':unMdp', $mdp, PDO::PARAM_STR);
         $requetePrepare->execute();
 
         $row = $requetePrepare->fetch(PDO::FETCH_ASSOC);
@@ -164,6 +120,18 @@ class PdoGsb
             'id_role' => $row['id_role'],
             'roleLibelle' => $row['roleLibelle']
         ];
+    }
+    
+    public function getMdpVisiteur($login) 
+    {
+        $requetePrepare = $this->connexion->prepare(
+            'SELECT mdp '
+            . 'FROM visiteur '
+            . 'WHERE visiteur.login = :unLogin'
+        );
+        $requetePrepare->bindParam(':unLogin', $login, PDO::PARAM_STR);
+        $requetePrepare->execute();
+        return $requetePrepare->fetch(PDO::FETCH_OBJ)->mdp;
     }
 
     /**
