@@ -89,7 +89,6 @@ class PdoGsb
      * Si la colonne password_hash est présente: compare SHA-256; sinon fallback legacy (mdp en clair).
      *
      * @param string $login Login du visiteur
-     * @param string $mdp   Mot de passe soumis (clair)
      * @return array|false  Tableau ['id','nom','prenom'] si authentifié, False sinon
      */
     public function getInfosVisiteur($login): array

@@ -129,6 +129,7 @@
                                     </td>
                                     <td class="align-middle">
                                         <div class="d-flex gap-2">
+                                            <a class="btn btn-success btn-sm text-decoration-none" href="index.php?uc=validerFiche&action=corrigerHF&idFrais=<?php echo htmlspecialchars($hf['id']); ?>&visiteur=<?php echo htmlspecialchars($idVisiteur); ?>&mois=<?php echo htmlspecialchars($mois); ?>">Corriger</a>
                                             <a class="btn btn-danger btn-sm text-decoration-none" href="index.php?uc=validerFiche&action=refuserHF&idFrais=<?php echo htmlspecialchars($hf['id']); ?>&visiteur=<?php echo htmlspecialchars($idVisiteur); ?>&mois=<?php echo htmlspecialchars($mois); ?>">Refuser</a>
                                         </div>
                                     </td>
