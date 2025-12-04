@@ -119,17 +119,16 @@
                                 ?>
                                 <tr>
                                     <td class="align-middle">
-                                        <?php echo htmlspecialchars($hf['date']); ?>
+                                        <input type="text" class="form-control form-control-sm" value="<?php echo htmlspecialchars($hf['date']); ?>" >
                                     </td>
                                     <td class="align-middle">
-                                       <?php echo htmlspecialchars($hf['libelle']); ?>
+                                        <input type="text" class="form-control form-control-sm" value="<?php echo htmlspecialchars($hf['libelle']); ?>">
                                     </td>
                                     <td class="align-middle">
-                                        <?php echo htmlspecialchars(number_format((float) $hf['montant'], 2, '.', '')); ?>
+                                        <input type="text" class="form-control form-control-sm" value="<?php echo htmlspecialchars(number_format((float) $hf['montant'], 2, '.', '')); ?>">
                                     </td>
                                     <td class="align-middle">
                                         <div class="d-flex gap-2">
-                                            <a class="btn btn-success btn-sm text-decoration-none" href="index.php?uc=validerFiche&action=corrigerHF&idFrais=<?php echo htmlspecialchars($hf['id']); ?>&visiteur=<?php echo htmlspecialchars($idVisiteur); ?>&mois=<?php echo htmlspecialchars($mois); ?>">Corriger</a>
                                             <a class="btn btn-danger btn-sm text-decoration-none" href="index.php?uc=validerFiche&action=refuserHF&idFrais=<?php echo htmlspecialchars($hf['id']); ?>&visiteur=<?php echo htmlspecialchars($idVisiteur); ?>&mois=<?php echo htmlspecialchars($mois); ?>">Refuser</a>
                                         </div>
                                     </td>
@@ -146,6 +145,7 @@
                 </table>
             </div>
         </div> <!-- card-body -->
+       
     </div>
     <div class="p-3">
         <div class="row g-2 align-items-center">
