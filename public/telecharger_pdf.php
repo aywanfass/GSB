@@ -22,29 +22,35 @@ if (!$idVisiteur) {
 $pdo = PdoGsb::getPdoGsb();
 $leMois = filter_input(INPUT_GET, 'mois', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
 
+// Vérification que le mois est bien renseigné dans l'URL
 if (!$leMois) {
-    exit('Mois non spécifié.');
+    exit('Erreur : Le mois de la fiche n\'est pas précisé.');
 }
 
-// Récupération des données
+// Récupération des informations de la fiche en base de données
 $lesInfosFicheFrais = $pdo->getLesInfosFicheFrais($idVisiteur, $leMois);
 
-// Sécurité : "un pdf par mois" (une fois la saisie close)
-if (!$lesInfosFicheFrais || $lesInfosFicheFrais['idEtat'] === 'CR') {
-    exit('La fiche de frais pour ce mois n\'est pas encore clôturée. Génération du PDF impossible.');
+// Règle de gestion "Green-IT"
+// On ne permet la génération du PDF QUE si la fiche est "Validée" (VA) ou "Remboursée" (RB)
+$etatFiche = $lesInfosFicheFrais['idEtat'];
+if ($etatFiche != 'VA' && $etatFiche != 'RB') {
+    exit('Action non autorisée : Le PDF n\'est disponible qu\'une fois la fiche validée ou mise en paiement.');
 }
 
+// Étape 4 : Collecte de toutes les données nécessaires pour le document
 $lesFraisForfait = $pdo->getLesFraisForfait($idVisiteur, $leMois);
 $lesFraisHorsForfait = $pdo->getLesFraisHorsForfait($idVisiteur, $leMois);
 $infosVisiteur = $pdo->getVisiteur($idVisiteur);
 
 $numAnnee = substr($leMois, 0, 4);
 $numMois = substr($leMois, 4, 2);
-$libelleMois = Utilitaires::getLibelleMois((int)$numMois);
+$libelleMois = Utilitaires::getLibelleMois((int) $numMois);
 
 // --- Création du PDF ---
-class GsbPdf extends FPDF {
-    function Header() {
+class GsbPdf extends FPDF
+{
+    function Header()
+    {
         // Logo
         if (file_exists('./images/logo.jpg')) {
             $this->Image('./images/logo.jpg', 10, 8, 33);
@@ -59,7 +65,8 @@ class GsbPdf extends FPDF {
         $this->Ln(30);
     }
 
-    function Footer() {
+    function Footer()
+    {
         // Positionnement à 1,5 cm du bas
         $this->SetY(-15);
         // Police Arial italique 8

@@ -119,22 +119,36 @@
                     <tbody>
                         <?php
                         if (isset($lesFraisHorsForfait) && count($lesFraisHorsForfait) > 0) {
+                            // On parcourt chaque frais hors forfait
                             foreach ($lesFraisHorsForfait as $hf) {
+                                $libelle = $hf['libelle'];
+                                // Règle BTS : On détecte si le frais est refusé (commence par "REFUSE ")
+                                $estRefuse = (strpos($libelle, 'REFUSE ') === 0);
+                                
+                                // Si refusé, on applique les classes CSS d'opacité et de texte barré
+                                $classeLigne = '';
+                                if ($estRefuse) {
+                                    $classeLigne = 'opacity-50 text-decoration-line-through';
+                                }
                                 ?>
-                                <tr>
+                                <tr class="<?php echo $classeLigne; ?>">
                                     <td class="align-middle">
-                                        <input type="text" class="form-control form-control-sm" value="<?php echo htmlspecialchars($hf['date']); ?>" >
+                                        <input type="text" class="form-control form-control-sm" value="<?php echo htmlspecialchars($hf['date']); ?>" readonly>
                                     </td>
                                     <td class="align-middle">
-                                        <input type="text" class="form-control form-control-sm" value="<?php echo htmlspecialchars($hf['libelle']); ?>">
+                                        <input type="text" class="form-control form-control-sm" value="<?php echo htmlspecialchars($libelle); ?>" readonly>
                                     </td>
                                     <td class="align-middle">
-                                        <input type="text" class="form-control form-control-sm" value="<?php echo htmlspecialchars(number_format((float) $hf['montant'], 2, '.', '')); ?>">
+                                        <input type="text" class="form-control form-control-sm" value="<?php echo htmlspecialchars(number_format((float) $hf['montant'], 2, '.', '')); ?>" readonly>
                                     </td>
                                     <td class="align-middle">
                                         <div class="d-flex gap-2">
-                                            <a class="btn btn-success btn-sm text-decoration-none" href="index.php?uc=validerFiche&action=corrigerHF&idFrais=<?php echo htmlspecialchars($hf['id']); ?>&visiteur=<?php echo htmlspecialchars($idVisiteur); ?>&mois=<?php echo htmlspecialchars($mois); ?>">Corriger</a>
-                                            <a class="btn btn-danger btn-sm text-decoration-none" href="index.php?uc=validerFiche&action=refuserHF&idFrais=<?php echo htmlspecialchars($hf['id']); ?>&visiteur=<?php echo htmlspecialchars($idVisiteur); ?>&mois=<?php echo htmlspecialchars($mois); ?>">Refuser</a>
+                                            <?php if (!$estRefuse) { ?>
+                                                <a class="btn btn-success btn-sm text-decoration-none" href="index.php?uc=validerFiche&action=corrigerHF&idFrais=<?php echo htmlspecialchars($hf['id']); ?>&visiteur=<?php echo htmlspecialchars($idVisiteur); ?>&mois=<?php echo htmlspecialchars($mois); ?>">Corriger</a>
+                                                <a class="btn btn-danger btn-sm text-decoration-none" href="index.php?uc=validerFiche&action=refuserHF&idFrais=<?php echo htmlspecialchars($hf['id']); ?>&visiteur=<?php echo htmlspecialchars($idVisiteur); ?>&mois=<?php echo htmlspecialchars($mois); ?>">Refuser</a>
+                                            <?php } else { ?>
+                                                <span class="badge bg-secondary">Refusé</span>
+                                            <?php } ?>
                                         </div>
                                     </td>
                                 </tr>

@@ -27,13 +27,51 @@
                 </h5>
             </div>
             <div class="card-body">
+                <?php
+                // Étape 1 : Affichage de l'état actuel de la fiche (Saisie en cours, Validée, etc.)
+                ?>
                 <p class="mb-2"><strong>État :</strong> <span class="badge bg-info text-dark"><?php echo $libEtat ?></span></p>
+                
+                <?php
+                // Étape 2 : Date de la dernière mise à jour par le comptable ou le système
+                ?>
                 <p class="mb-2 text-muted x-small italic">Dernière modification le <?php echo $dateModif ?></p>
+                
+                <?php
+                // Étape 3 : Montant validé (affiché seulement après validation par le comptable)
+                ?>
                 <p class="mb-3"><strong>Montant validé :</strong> <span class="text-primary fw-bold"><?php echo $montantValide ?> €</span></p>
                 
-                <a class="btn btn-outline-primary btn-sm" href="telecharger_pdf.php?mois=<?php echo htmlspecialchars($leMois); ?>">
+                <?php 
+                // Étape 4 : Gestion du bouton PDF (Règle Green-IT)
+                // On récupère le code de l'état (VA = Validé, RB = Remboursé)
+                $idEtat = $lesInfosFicheFrais['idEtat'];
+                $peutTelecharger = false;
+                if ($idEtat == 'VA' || $idEtat == 'RB') {
+                    $peutTelecharger = true;
+                }
+                
+                // On définit les classes CSS du bouton (on ajoute 'disabled' si non téléchargeable)
+                $classeBouton = "btn btn-outline-primary btn-sm";
+                if (!$peutTelecharger) {
+                    $classeBouton = $classeBouton . " disabled";
+                }
+                ?>
+                
+                <a class="<?php echo $classeBouton; ?>" 
+                   href="telecharger_pdf.php?mois=<?php echo htmlspecialchars($leMois); ?>"
+                   title="<?php echo !$peutTelecharger ? 'Disponible uniquement après validation' : 'Télécharger le PDF'; ?>">
                     <i class="bi bi-file-earmark-pdf me-1"></i> Télécharger PDF
                 </a>
+
+                <?php 
+                // Petit message d'explication si le bouton est grisé
+                if (!$peutTelecharger) {
+                ?>
+                    <p class="text-muted x-small mt-2 italic">
+                        <i class="bi bi-info-circle me-1"></i> Le PDF sera disponible une fois la fiche mise en paiement.
+                    </p>
+                <?php } ?>
             </div>
         </div>
     </div>
@@ -89,11 +127,13 @@
                 <?php
                 foreach ($lesFraisHorsForfait as $unFraisHorsForfait) {
                     $date = $unFraisHorsForfait['date'];
-                    $libelle = htmlspecialchars($unFraisHorsForfait['libelle']);
+                    $libelle = $unFraisHorsForfait['libelle'];
+                    $estRefuse = (strpos($libelle, 'REFUSE ') === 0);
+                    $classRefuse = $estRefuse ? 'opacity-50 text-decoration-line-through' : '';
                     $montant = $unFraisHorsForfait['montant']; ?>
-                    <tr>
-                        <td class="small"><?php echo $date ?></td>
-                        <td class="small"><?php echo $libelle ?></td>
+                    <tr class="<?php echo $classRefuse; ?>">
+                        <td class="small"><?php echo htmlspecialchars($date) ?></td>
+                        <td class="small"><?php echo htmlspecialchars($libelle) ?></td>
                         <td class="small text-end fw-bold"><?php echo htmlspecialchars(number_format((float)$montant, 2, ',', ' ')) ?> €</td>
                     </tr>
                     <?php
