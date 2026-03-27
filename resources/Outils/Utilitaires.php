@@ -101,6 +101,23 @@ abstract class Utilitaires
         return $annee . $mois;
     }
 
+    /**
+     * Retourne le libellé d'un mois en français
+     *
+     * @param Integer $numMois Numéro du mois (1 à 12)
+     *
+     * @return String Libellé du mois (ex: Janvier)
+     */
+    public static function getLibelleMois($numMois): string
+    {
+        $lesMois = array(
+            1 => 'Janvier', 2 => 'Février', 3 => 'Mars', 4 => 'Avril',
+            5 => 'Mai', 6 => 'Juin', 7 => 'Juillet', 8 => 'Août',
+            9 => 'Septembre', 10 => 'Octobre', 11 => 'Novembre', 12 => 'Décembre'
+        );
+        return $lesMois[(int)$numMois];
+    }
+
     /* gestion des erreurs */
 
     /**
@@ -250,4 +267,33 @@ abstract class Utilitaires
             return count($_REQUEST['erreurs']);
         }
     }
+    
+     public static function setRole(?string $roleId): void
+    {
+        $_SESSION['role'] = $roleId;
+    }
+
+    public static function getRole(): ?string
+    {
+        return $_SESSION['role'] ?? null;
+    }
+
+    public static function hasRole(string $roleId): bool
+    {
+        return self::getRole() === $roleId;
+    }
+
+    /**
+     * Exige un ou plusieurs rôles; 403 si non autorisé.
+     */
+    public static function exigerRole(string|array $roles): void
+    {
+        $roles = (array)$roles;
+        if (!in_array(self::getRole(), $roles, true)) {
+            header('HTTP/1.1 403 Forbidden');
+            echo 'Accès refusé';
+            exit;
+        }
+    }
+
 }

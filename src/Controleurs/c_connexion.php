@@ -14,7 +14,6 @@
  * @version   GIT: <0>
  * @link      http://www.reseaucerta.org Contexte « Laboratoire GSB »
  */
-
 use Outils\Utilitaires;
 
 $action = filter_input(INPUT_GET, 'action', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
@@ -30,7 +29,7 @@ switch ($action) {
         $login = filter_input(INPUT_POST, 'login', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
         $mdp = filter_input(INPUT_POST, 'mdp', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
         $visiteur = $pdo->getInfosVisiteur($login, $mdp);
-        if (!is_array($visiteur)) {
+        if (!password_verify($mdp,$pdo->getMdpVisiteur($login))) {
             Utilitaires::ajouterErreur('Login ou mot de passe incorrect');
             include PATH_VIEWS . 'v_erreurs.php';
             include PATH_VIEWS . 'v_connexion.php';
@@ -39,6 +38,8 @@ switch ($action) {
             $nom = $visiteur['nom'];
             $prenom = $visiteur['prenom'];
             Utilitaires::connecter($id, $nom, $prenom);
+            $roleId = $visiteur['id_role'] ?? 'VIS';
+            Utilitaires::setRole($roleId);
             header('Location: index.php');
         }
         break;

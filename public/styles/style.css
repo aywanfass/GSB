@@ -4,7 +4,6 @@ html, body {
 
 body {
   margin: 0;
-  /* Le footer est géré par le flex layout (min-vh-100 + mt-auto) */
   background-color: var(--bs-body-bg);
   color: var(--bs-body-color);
 }
@@ -230,10 +229,76 @@ a:hover {
 }
 
 /* Footer */
+footer {
+  margin-top: auto;
+  border-top: 1px solid var(--bs-border-color);
+  padding: 1.5rem 0;
+  background-color: #f8f9fa;
+}
+
 footer .container p {
   text-align: center;
-  color: #337ab7;
+  color: var(--bs-primary);
   margin: 0;
+  font-size: 0.9rem;
+}
+
+/* Accountant specific styles (yellow/warning theme) */
+.app-sidebar .nav-link.active.bg-warning {
+  background-color: var(--bs-warning) !important;
+  color: #fff !important;
+  box-shadow: 0 4px 6px rgba(var(--bs-warning-rgb), 0.2);
+}
+
+.app-sidebar .nav-link.text-warning:hover {
+  background: rgba(var(--bs-warning-rgb), 0.1);
+  color: #8a6d3b !important;
+}
+
+.border-warning {
+  border-color: var(--bs-warning) !important;
+}
+
+.text-warning {
+  color: #8a6d3b !important; /* Slightly darker for better readability */
+}
+
+.bg-warning {
+  background-color: var(--bs-warning) !important;
+}
+
+/* Visitor specific styles (blue theme) */
+.card-visitor {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border-width: 1px;
+}
+
+.card-visitor:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1) !important;
+}
+
+.card-visitor .card-header {
+  background-color: var(--bs-primary);
+  color: #fff;
+  border-bottom: none;
+}
+
+.text-primary {
+  color: var(--bs-primary) !important;
+}
+
+.border-primary {
+  border-color: var(--bs-primary) !important;
+}
+
+/* Utilities */
+.x-small {
+  font-size: 0.75rem;
+}
+
+.table-hover tbody tr:hover {
+  background-color: rgba(var(--bs-primary-rgb), 0.03);
 }
 
 /* Code inline */

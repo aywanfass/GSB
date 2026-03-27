@@ -3,49 +3,93 @@
  * Sidebar de navigation (Bootstrap 5.3)
  * Utilise Bootstrap Icons.
  * Variables disponibles : $uc (use-case courant)
+ *
+ * Affiche des onglets différents si l'utilisateur a le rôle 'COMPT'
+ * (stocké dans $_SESSION['role']).
  */
+$action = filter_input(INPUT_GET, 'action', FILTER_SANITIZE_FULL_SPECIAL_CHARS) ?: '';
+$role = $_SESSION['role'] ?? null;
 ?>
 <nav id="sidebar" class="app-sidebar p-3">
     <h5 class="d-flex align-items-center mb-3">
-        <i class="bi bi-diagram-3-fill me-2 text-primary"></i>
-        <span>GSB Intranet</span>
+        <img src="./images/logo.jpg" class="img-fluid d-block mx-auto" alt="Laboratoire Galaxy-Swiss Bourdin" style="max-height:75px;">
     </h5>
     <hr>
     <ul class="nav nav-pills flex-column mb-auto">
-        <li class="nav-item">
-            <a href="index.php"
-               class="nav-link <?php echo (!$uc || $uc === 'accueil') ? 'active' : ''; ?>">
-                <i class="bi bi-house"></i>
-                Accueil
-            </a>
-        </li>
-        <li>
-            <a href="index.php?uc=gererFrais&action=saisirFrais"
-               class="nav-link <?php echo ($uc === 'gererFrais') ? 'active' : ''; ?>">
-                <i class="bi bi-pencil-square"></i>
-                Fiche de frais
-            </a>
-        </li>
-        <li>
-            <a href="index.php?uc=etatFrais&action=selectionnerMois"
-               class="nav-link <?php echo ($uc === 'etatFrais') ? 'active' : ''; ?>">
-                <i class="bi bi-card-list"></i>
-                Mes fiches
-            </a>
-        </li>
-        <li>
-            <a href="index.php?uc=deconnexion&action=demandeDeconnexion"
-               class="nav-link <?php echo ($uc === 'deconnexion') ? 'active' : ''; ?>">
-                <i class="bi bi-box-arrow-right"></i>
-                Déconnexion
-            </a>
-        </li>
+        <?php if ($role === 'COMPT') : ?>
+           <li class="nav-item ">
+                    <a href="index.php"
+                       class="nav-link <?php echo (!$uc || $uc === 'accueil') ? 'active bg-warning ' : 'text-warning'; ?>">
+                        <i class="bi bi-house"></i>
+                        Accueil
+                    </a>
+            </li>
+            <li class="nav-item">
+                <a href="index.php?uc=validerFiche&action=afficher"
+                   class="nav-link <?php echo ($uc === 'validerFiche' && $action === 'afficher') ? 'active bg-warning ' : 'text-warning'; ?>">
+                    <i class="bi bi-check"></i>
+                    Valider les fiches de frais
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="index.php?uc=suiviPaiement&action=afficher"
+                   class="nav-link <?php echo ($uc === 'suiviPaiement' && $action === 'afficher') ? 'active bg-warning ' : 'text-warning'; ?>">
+                    <i class="bi bi-currency-euro"></i>
+                    Suivre le paiement des fiches de frais
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="index.php?uc=deconnexion&action=demandeDeconnexion"
+                   class="nav-link <?php echo ($uc === 'deconnexion') ? 'active bg-warning ' : 'text-warning'; ?>">
+                    <i class="bi bi-box-arrow-right"></i>
+                    Déconnexion
+                </a>
+            </li>
+        <?php else : ?>
+            <li class="nav-item">
+                <a href="index.php"
+                   class="nav-link <?php echo (!$uc || $uc === 'accueil') ? 'active' : ''; ?>">
+                    <i class="bi bi-house"></i>
+                    Accueil
+                </a>
+            </li>
+            <li>
+                <a href="index.php?uc=gererFrais&action=saisirFrais"
+                   class="nav-link <?php echo ($uc === 'gererFrais') ? 'active' : ''; ?>">
+                    <i class="bi bi-pencil-square"></i>
+                    Fiche de frais
+                </a>
+            </li>
+            <li>
+                <a href="index.php?uc=etatFrais&action=selectionnerMois"
+                   class="nav-link <?php echo ($uc === 'etatFrais') ? 'active' : ''; ?>">
+                    <i class="bi bi-card-list"></i>
+                    Mes fiches
+                </a>
+            </li>
+            <li>
+                <a href="index.php?uc=deconnexion&action=demandeDeconnexion"
+                   class="nav-link <?php echo ($uc === 'deconnexion') ? 'active' : ''; ?>">
+                    <i class="bi bi-box-arrow-right"></i>
+                    Déconnexion
+                </a>
+            </li>
+        <?php endif; ?>
     </ul>
     <hr>
     <?php if (isset($_SESSION['prenom'], $_SESSION['nom'])) { ?>
-        <div class="small text-muted">
-            <i class="bi bi-person-badge me-1"></i>
-            <?php echo htmlspecialchars($_SESSION['prenom'] . ' ' . $_SESSION['nom']); ?>
+        <div class="mt-auto pt-3">
+            <div class="d-flex align-items-center gap-2 p-2 rounded bg-light border">
+                <div class="bg-<?php echo ($role === 'COMPT') ? 'warning' : 'primary'; ?> text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                    <i class="bi bi-person-fill"></i>
+                </div>
+                <div class="overflow-hidden">
+                    <p class="mb-0 small fw-bold text-truncate"><?php echo htmlspecialchars($_SESSION['prenom'] . ' ' . $_SESSION['nom']); ?></p>
+                    <p class="mb-0 x-small text-muted text-uppercase" style="font-size: 0.7rem;">
+                        <?php echo ($role === 'COMPT') ? 'Comptable' : 'Visiteur médical'; ?>
+                    </p>
+                </div>
+            </div>
         </div>
     <?php } ?>
 </nav>
