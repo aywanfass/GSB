@@ -3,9 +3,13 @@
  * Vue Liste des frais au forfait (Bootstrap 5.3)
  */
 ?>
+<div class="row mb-3">
+    <div class="col-12">
+        <h2>Renseigner ma fiche de frais du mois <?php echo htmlspecialchars($numMois . '-' . $numAnnee); ?></h2>
+        <h3>Éléments forfaitisés</h3>
+    </div>
+</div>
 <div class="row">
-    <h2>Renseigner ma fiche de frais du mois <?php echo htmlspecialchars($numMois . '-' . $numAnnee); ?></h2>
-    <h3>Éléments forfaitisés</h3>
     <div class="col-md-4">
         <form method="post"
               action="index.php?uc=gererFrais&action=validerMajFraisForfait">

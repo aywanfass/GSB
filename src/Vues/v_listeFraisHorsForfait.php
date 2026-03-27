@@ -45,8 +45,12 @@
         </div>
     </div>
 </div>
+<div class="row mb-3">
+    <div class="col-12">
+        <h3>Nouvel élément hors forfait</h3>
+    </div>
+</div>
 <div class="row">
-    <h3>Nouvel élément hors forfait</h3>
     <div class="col-md-4">
         <form action="index.php?uc=gererFrais&action=validerCreationFrais" method="post">
             <div class="mb-3">
@@ -60,8 +64,8 @@
             <div class="mb-3">
                 <label for="txtMontantHF" class="form-label">Montant :</label>
                 <div class="input-group">
-                    <span class="input-group-text">€</span>
                     <input type="text" id="txtMontantHF" name="montant" class="form-control" value="">
+                    <span class="input-group-text">€</span>
                 </div>
             </div>
             <button class="btn btn-success me-2" type="submit">Ajouter</button>
