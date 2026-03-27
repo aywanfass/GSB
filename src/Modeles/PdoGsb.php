@@ -201,6 +201,7 @@ class PdoGsb
         $requetePrepare = $this->connexion->prepare(
             'SELECT fraisforfait.id as idfrais, '
             . 'fraisforfait.libelle as libelle, '
+            . 'fraisforfait.montant as montant, '
             . 'lignefraisforfait.quantite as quantite '
             . 'FROM lignefraisforfait '
             . 'INNER JOIN fraisforfait '

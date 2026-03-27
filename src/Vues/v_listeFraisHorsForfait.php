@@ -19,65 +19,81 @@
 ?>
 <hr>
 <div class="row">
-    <div class="panel panel-info">
-        <div class="panel-heading">Descriptif des éléments hors forfait</div>
-        <table class="table table-bordered table-responsive">
-            <thead>
-                <tr>
-                    <th class="date">Date</th>
-                    <th class="libelle">Libellé</th>  
-                    <th class="montant">Montant</th>  
-                    <th class="action">&nbsp;</th> 
-                </tr>
-            </thead>  
-            <tbody>
-            <?php
-            foreach ($lesFraisHorsForfait as $unFraisHorsForfait) {
-                $libelle = htmlspecialchars($unFraisHorsForfait['libelle']);
-                $date = $unFraisHorsForfait['date'];
-                $montant = $unFraisHorsForfait['montant'];
-                $id = $unFraisHorsForfait['id']; ?>           
-                <tr>
-                    <td> <?php echo $date ?></td>
-                    <td> <?php echo $libelle ?></td>
-                    <td><?php echo $montant ?></td>
-                    <td>
-                        <a href="index.php?uc=gererFrais&action=supprimerFrais&idFrais=<?php echo $id ?>" 
-                           onclick="return confirm('Voulez-vous vraiment supprimer ce frais?');">
-                            Supprimer ce frais
-                        </a>
-                    </td>
-                </tr>
-                <?php
-            }
-            ?>
-            </tbody>  
-        </table>
+    <div class="col-12">
+        <div class="card shadow-sm border-primary mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title mb-0 fs-6">Descriptif des éléments hors forfait</h5>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover mb-0 align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="small">Date</th>
+                            <th class="small">Libellé</th>  
+                            <th class="small text-end">Montant</th>  
+                            <th class="small text-center">Action</th> 
+                        </tr>
+                    </thead>  
+                    <tbody>
+                    <?php
+                    foreach ($lesFraisHorsForfait as $unFraisHorsForfait) {
+                        $libelle = htmlspecialchars($unFraisHorsForfait['libelle']);
+                        $date = $unFraisHorsForfait['date'];
+                        $montant = $unFraisHorsForfait['montant'];
+                        $id = $unFraisHorsForfait['id']; ?>           
+                        <tr>
+                            <td class="small"> <?php echo $date ?></td>
+                            <td class="small"> <?php echo $libelle ?></td>
+                            <td class="small text-end fw-bold"> <?php echo htmlspecialchars(number_format((float)$montant, 2, ',', ' ')) ?> €</td>
+                            <td class="text-center">
+                                <a href="index.php?uc=gererFrais&action=supprimerFrais&idFrais=<?php echo $id ?>" 
+                                   class="btn btn-outline-danger btn-sm"
+                                   onclick="return confirm('Voulez-vous vraiment supprimer ce frais?');">
+                                    <i class="bi bi-trash me-1"></i> Supprimer
+                                </a>
+                            </td>
+                        </tr>
+                        <?php
+                    }
+                    ?>
+                    </tbody>  
+                </table>
+            </div>
+        </div>
     </div>
 </div>
-<div class="row">
-    <h3>Nouvel élément hors forfait</h3>
-    <div class="col-md-4">
-        <form action="index.php?uc=gererFrais&action=validerCreationFrais" 
-              method="post" role="form">
-            <div class="form-group">
-                <label for="txtDateHF">Date (jj/mm/aaaa): </label>
-                <input type="date" id="txtDateHF" name="dateFrais" 
-                       class="form-control" id="text">
+<div class="row mb-5">
+    <div class="col-12 col-md-6 col-lg-5">
+        <div class="card shadow-sm border-primary">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title mb-0 fs-6">
+                    <i class="bi bi-plus-circle me-2"></i>
+                    Nouvel élément hors forfait
+                </h5>
             </div>
-            <div class="form-group">
-                <label for="txtLibelleHF">Libellé</label>             
-                <input type="text" id="txtLibelleHF" name="libelle" class="form-control" id="text">
-            </div> 
-            <div class="form-group">
-                <label for="txtMontantHF">Montant : </label>
-                <div class="input-group">
-                    <span class="input-group-addon">€</span>
-                    <input type="text" id="txtMontantHF" name="montant" class="form-control" value="">
-                </div>
+            <div class="card-body">
+                <form action="index.php?uc=gererFrais&action=validerCreationFrais" method="post" role="form">
+                    <div class="mb-3">
+                        <label for="txtDateHF" class="form-label small fw-bold text-secondary">Date (jj/mm/aaaa) :</label>
+                        <input type="date" id="txtDateHF" name="dateFrais" class="form-control form-control-sm border-primary">
+                    </div>
+                    <div class="mb-3">
+                        <label for="txtLibelleHF" class="form-label small fw-bold text-secondary">Libellé :</label>             
+                        <input type="text" id="txtLibelleHF" name="libelle" class="form-control form-control-sm border-primary" placeholder="Ex: Restaurant, Taxi...">
+                    </div> 
+                    <div class="mb-4">
+                        <label for="txtMontantHF" class="form-label small fw-bold text-secondary">Montant :</label>
+                        <div class="input-group input-group-sm">
+                            <input type="text" id="txtMontantHF" name="montant" class="form-control border-primary" value="">
+                            <span class="input-group-text bg-primary border-primary text-white">€</span>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-success btn-sm px-4" type="submit">Ajouter</button>
+                        <button class="btn btn-outline-danger btn-sm px-4" type="reset">Effacer</button>
+                    </div>
+                </form>
             </div>
-            <button class="btn btn-success" type="submit">Ajouter</button>
-            <button class="btn btn-danger" type="reset">Effacer</button>
-        </form>
+        </div>
     </div>
 </div>

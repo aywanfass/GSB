@@ -78,10 +78,18 @@ $role = $_SESSION['role'] ?? null;
     </ul>
     <hr>
     <?php if (isset($_SESSION['prenom'], $_SESSION['nom'])) { ?>
-        <div class="small text-muted">
-            <i class="bi bi-person-badge me-1"></i>
-            <?php echo htmlspecialchars($_SESSION['prenom'] . ' ' . $_SESSION['nom']); ?>
-            <?php if ($role) { ?>&nbsp;–&nbsp;<strong><?php echo htmlspecialchars($role); ?></strong><?php } ?>
+        <div class="mt-auto pt-3">
+            <div class="d-flex align-items-center gap-2 p-2 rounded bg-light border">
+                <div class="bg-<?php echo ($role === 'COMPT') ? 'warning' : 'primary'; ?> text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                    <i class="bi bi-person-fill"></i>
+                </div>
+                <div class="overflow-hidden">
+                    <p class="mb-0 small fw-bold text-truncate"><?php echo htmlspecialchars($_SESSION['prenom'] . ' ' . $_SESSION['nom']); ?></p>
+                    <p class="mb-0 x-small text-muted text-uppercase" style="font-size: 0.7rem;">
+                        <?php echo ($role === 'COMPT') ? 'Comptable' : 'Visiteur médical'; ?>
+                    </p>
+                </div>
+            </div>
         </div>
     <?php } ?>
 </nav>

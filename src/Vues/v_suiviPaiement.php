@@ -2,48 +2,54 @@
 <div class="container-fluid px-0">
 
     <!-- sélection visiteur -->
-    <div class="ms-0 col-md-3 row mb-4 gx-0 card-body py-3 px-3">
-        <form method="get" id="chargerFicheForm" action="index.php" role="form" class="row gx-2 gy-2 align-items-end">
-            <input type="hidden" name="uc" value="suiviPaiement">
-            <input type="hidden" name="action" value="lister">
-            <div class="col-12 col-sm-8">
-                <label for="visiteur" class="form-label small mb-1 fw-bold">Choisir le visiteur :</label>
-                <select class="form-select form-select-sm" id="visiteur" name="visiteur">
-                    <option value="">Tous</option>
-                    <?php
-                    if (isset($tousVisiteurs)) {
-                        foreach ($tousVisiteurs as $v) {
-                            ?>
-                            <option value="<?php echo htmlspecialchars($v['id']); ?>" <?php
-                            if (isset($filtreVisiteur) && $filtreVisiteur === $v['id']) {
-                                echo 'selected';
-                            }
-                            ?>>
-                                        <?php echo htmlspecialchars($v['nom'] . ' ' . $v['prenom']); ?>
-                            </option>
-                            <?php
-                        }
-                    }
-                    ?>
-                </select>
+    <div class="row mb-4">
+        <div class="col-12 col-md-6 col-lg-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-body py-3">
+                    <form method="get" id="chargerFicheForm" action="index.php" role="form" class="row g-3 align-items-end">
+                        <input type="hidden" name="uc" value="suiviPaiement">
+                        <input type="hidden" name="action" value="lister">
+                        <div class="col-12">
+                            <label for="visiteur" class="form-label small mb-1 fw-bold text-secondary">Choisir le visiteur :</label>
+                            <select class="form-select form-select-sm border-warning" id="visiteur" name="visiteur">
+                                <option value="">Tous les visiteurs</option>
+                                <?php
+                                if (isset($tousVisiteurs)) {
+                                    foreach ($tousVisiteurs as $v) {
+                                        ?>
+                                        <option value="<?php echo htmlspecialchars($v['id']); ?>" <?php
+                                        if (isset($filtreVisiteur) && $filtreVisiteur === $v['id']) {
+                                            echo 'selected';
+                                        }
+                                        ?>>
+                                                    <?php echo htmlspecialchars($v['nom'] . ' ' . $v['prenom']); ?>
+                                        </option>
+                                        <?php
+                                    }
+                                }
+                                ?>
+                            </select>
+                        </div>
+                    </form> 
+                </div>
             </div>
-        </form> 
+        </div>
     </div>
 
     <!-- Titre -->
-    <div class="row mb-3 gx-0">
+    <div class="row mb-3">
         <div class="col-12">
-            <h2 class="mb-4 text-warning ms-0 ps-0">Suivi des paiements</h2>
+            <h2 class="mb-4 text-warning border-bottom pb-2">Suivi des paiements</h2>
         </div>
     </div>
 
     <!-- Fiches validées -->
-    <div class="card shadow-sm ms-0 border-warning col-12 col-lg-7">
-        <div class="card-header p-0">
-            <div class="bg-warning text-white py-2 px-3">
-                <h6 class="mb-0">Fiches validées</h6>
-            </div>
-        </div>
+    <div class="row">
+        <div class="col-12 col-lg-10">
+            <div class="card shadow-sm border-warning">
+                <div class="card-header bg-warning text-white py-2 px-3">
+                    <h6 class="mb-0">Fiches validées</h6>
+                </div>
         
         <div class="table-responsive card-body p-0 overflow-hidden">
             <table class="table table-bordered table-sm mb-0 align-middle border-warning">
@@ -87,8 +93,9 @@
                     ?>
                 </tbody>
             </table>
+            </div>
         </div>
-    </div>    
+    </div>
 </div>
 
-<script src="/js/Menu_deroulant.js"></script>
+<script src="js/menu_deroulant.js"></script>
