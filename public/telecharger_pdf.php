@@ -1,6 +1,9 @@
 <?php
 /**
- * Génération de la fiche de frais en PDF (FPDF)
+ * Génération de la fiche de frais en PDF (FPDF) avec cache disque Green-IT.
+ *
+ * Tâche 7 : génère le PDF via FPDF.
+ * Tâche 8 : met le PDF en cache dans storage/pdf/ pour ne le générer qu'une seule fois.
  */
 
 require_once '../vendor/autoload.php';
@@ -10,68 +13,81 @@ ob_start();
 use Modeles\PdoGsb;
 use Outils\Utilitaires;
 
-// Inclusion manuelle de FPDF car non géré via composer.json PSR-4 par défaut dans ce projet
 require_once '../resources/Outils/fpdf/fpdf.php';
 
 // Vérification de la connexion
 $idVisiteur = $_SESSION['idVisiteur'] ?? null;
 if (!$idVisiteur) {
+    ob_end_clean();
+    http_response_code(403);
     exit('Accès refusé. Veuillez vous connecter.');
 }
 
 $pdo = PdoGsb::getPdoGsb();
 $leMois = filter_input(INPUT_GET, 'mois', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
 
-// Vérification que le mois est bien renseigné dans l'URL
 if (!$leMois) {
+    ob_end_clean();
     exit('Erreur : Le mois de la fiche n\'est pas précisé.');
 }
 
-// Récupération des informations de la fiche en base de données
+// Vérification de l'état de la fiche (Green-IT : PDF uniquement pour VA ou RB)
 $lesInfosFicheFrais = $pdo->getLesInfosFicheFrais($idVisiteur, $leMois);
-
-// Règle de gestion "Green-IT"
-// On ne permet la génération du PDF QUE si la fiche est "Validée" (VA) ou "Remboursée" (RB)
 $etatFiche = $lesInfosFicheFrais['idEtat'];
+
 if ($etatFiche != 'VA' && $etatFiche != 'RB') {
+    ob_end_clean();
+    http_response_code(403);
     exit('Action non autorisée : Le PDF n\'est disponible qu\'une fois la fiche validée ou mise en paiement.');
 }
 
-// Étape 4 : Collecte de toutes les données nécessaires pour le document
-$lesFraisForfait = $pdo->getLesFraisForfait($idVisiteur, $leMois);
-$lesFraisHorsForfait = $pdo->getLesFraisHorsForfait($idVisiteur, $leMois);
-$infosVisiteur = $pdo->getVisiteur($idVisiteur);
+// --- Green-IT : gestion du cache disque ---
+// Le dossier de cache est storage/pdf/ à la racine du projet (un niveau au-dessus de public/)
+$cacheDir = __DIR__ . '/../storage/pdf';
+if (!is_dir($cacheDir)) {
+    mkdir($cacheDir, 0755, true);
+}
 
-$numAnnee = substr($leMois, 0, 4);
-$numMois = substr($leMois, 4, 2);
+// Nom de fichier unique par visiteur et par mois
+$nomFichier = $idVisiteur . '_' . $leMois . '.pdf';
+$cheminCache = $cacheDir . '/' . $nomFichier;
+
+// Si le fichier existe déjà en cache, on le sert directement sans régénérer
+if (file_exists($cheminCache)) {
+    ob_end_clean();
+    header('Content-Type: application/pdf');
+    header('Content-Disposition: inline; filename="Fiche_Frais_' . $leMois . '.pdf"');
+    header('Content-Length: ' . filesize($cheminCache));
+    readfile($cheminCache);
+    exit;
+}
+
+// --- Génération du PDF (première fois uniquement) ---
+$lesFraisForfait    = $pdo->getLesFraisForfait($idVisiteur, $leMois);
+$lesFraisHorsForfait = $pdo->getLesFraisHorsForfait($idVisiteur, $leMois);
+$infosVisiteur      = $pdo->getVisiteur($idVisiteur);
+
+$numAnnee    = substr($leMois, 0, 4);
+$numMois     = substr($leMois, 4, 2);
 $libelleMois = Utilitaires::getLibelleMois((int) $numMois);
 
-// --- Création du PDF ---
 class GsbPdf extends FPDF
 {
     function Header()
     {
-        // Logo
         if (file_exists('./images/logo.jpg')) {
             $this->Image('./images/logo.jpg', 10, 8, 33);
         }
-        // Police Arial gras 15
         $this->SetFont('Arial', 'B', 15);
-        // Décalage à droite
         $this->Cell(80);
-        // Titre
         $this->Cell(80, 10, iconv('UTF-8', 'windows-1252', 'ÉTAT DE FRAIS ENGAGÉS'), 1, 0, 'C');
-        // Saut de ligne
         $this->Ln(30);
     }
 
     function Footer()
     {
-        // Positionnement à 1,5 cm du bas
         $this->SetY(-15);
-        // Police Arial italique 8
         $this->SetFont('Arial', 'I', 8);
-        // Numéro de page
         $this->Cell(0, 10, 'Page ' . $this->PageNo() . '/{nb}', 0, 0, 'C');
     }
 }
@@ -81,21 +97,20 @@ $pdf->AliasNbPages();
 $pdf->AddPage();
 $pdf->SetFont('Times', '', 12);
 
-// --- Infos Visiteur ---
+// Infos visiteur
 $pdf->SetFillColor(230, 230, 230);
 $pdf->Cell(0, 10, iconv('UTF-8', 'windows-1252', 'Visiteur : ' . strtoupper($infosVisiteur['nom']) . ' ' . $infosVisiteur['prenom']), 0, 1, 'L', true);
 $pdf->Cell(0, 10, iconv('UTF-8', 'windows-1252', 'Mois : ' . $libelleMois . ' ' . $numAnnee), 0, 1, 'L', true);
 $pdf->Ln(5);
 
-// --- Éléments Forfaitisés ---
+// Éléments forfaitisés
 $pdf->SetFont('Arial', 'B', 12);
-$pdf->SetTextColor(31, 78, 121); // Bleu GSB
+$pdf->SetTextColor(31, 78, 121);
 $pdf->Cell(0, 10, iconv('UTF-8', 'windows-1252', 'Éléments forfaitisés'), 0, 1);
 $pdf->SetTextColor(0);
 $pdf->SetFont('Arial', '', 10);
 
-// En-tête tableau forfait
-$pdf->SetFillColor(51, 122, 183); // Bleu primaire
+$pdf->SetFillColor(51, 122, 183);
 $pdf->SetTextColor(255);
 $w = array(60, 40, 40, 50);
 $pdf->Cell($w[0], 7, iconv('UTF-8', 'windows-1252', 'Frais Forfaitaires'), 1, 0, 'C', true);
@@ -120,14 +135,13 @@ foreach ($lesFraisForfait as $unFrais) {
 }
 $pdf->Ln(10);
 
-// --- Éléments Hors Forfait ---
+// Éléments hors forfait
 $pdf->SetFont('Arial', 'B', 12);
 $pdf->SetTextColor(31, 78, 121);
 $pdf->Cell(0, 10, iconv('UTF-8', 'windows-1252', 'Descriptif des éléments hors forfait'), 0, 1);
 $pdf->SetTextColor(0);
 $pdf->SetFont('Arial', '', 10);
 
-// En-tête tableau hors forfait
 $pdf->SetFillColor(51, 122, 183);
 $pdf->SetTextColor(255);
 $wHF = array(30, 110, 50);
@@ -146,10 +160,10 @@ foreach ($lesFraisHorsForfait as $unFraisHF) {
 }
 $pdf->Ln(10);
 
-// --- TOTAL ---
+// Total
 $pdf->SetFont('Arial', 'B', 14);
 $pdf->Cell(140, 10, 'TOTAL', 0, 0, 'R');
-$pdf->SetFillColor(255, 255, 0); // Jaune
+$pdf->SetFillColor(255, 255, 0);
 $pdf->Cell(50, 10, number_format($totalGeneral, 2, ',', ' ') . iconv('UTF-8', 'windows-1252', ' €'), 1, 1, 'R', true);
 
 $pdf->Ln(20);
@@ -157,6 +171,13 @@ $pdf->SetFont('Arial', '', 10);
 $pdf->Cell(0, 10, iconv('UTF-8', 'windows-1252', 'Fait à Paris, le ' . date('d/m/Y')), 0, 1, 'R');
 $pdf->Cell(0, 10, iconv('UTF-8', 'windows-1252', 'Signature'), 0, 1, 'R');
 
-// Sortie du PDF
+// Sauvegarde du PDF dans le cache disque (Green-IT : généré une seule fois)
+$contenuPdf = $pdf->Output('S');
+file_put_contents($cheminCache, $contenuPdf);
+
+// Envoi au navigateur depuis le contenu déjà en mémoire
 ob_end_clean();
-$pdf->Output('I', 'Fiche_Frais_' . $leMois . '.pdf');
+header('Content-Type: application/pdf');
+header('Content-Disposition: inline; filename="Fiche_Frais_' . $leMois . '.pdf"');
+header('Content-Length: ' . strlen($contenuPdf));
+echo $contenuPdf;
