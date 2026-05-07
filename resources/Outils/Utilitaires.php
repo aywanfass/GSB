@@ -17,12 +17,20 @@
 
 namespace Outils;
 
+/**
+ * Classe Utilitaires : Boîte à outils de l'application
+ * 
+ * Cette classe contient uniquement des méthodes statiques qui aident au 
+ * fonctionnement global : gestion des sessions, conversion de dates,
+ * validations de formulaires et gestion des erreurs.
+ */
 abstract class Utilitaires
 {
     /**
-     * Teste si un quelconque visiteur est connecté
+     * Vérifie si un utilisateur est actuellement connecté en session.
+     * On regarde simplement si la clé 'idVisiteur' existe dans le tableau $_SESSION.
      *
-     * @return vrai ou faux
+     * @return bool Vrai si connecté, faux sinon
      */
     public static function estConnecte(): bool
     {
@@ -30,13 +38,12 @@ abstract class Utilitaires
     }
 
     /**
-     * Enregistre dans une variable session les infos d'un visiteur
+     * Enregistre les informations de l'utilisateur dans la session PHP.
+     * Ces informations sont ensuite accessibles sur toutes les pages.
      *
-     * @param String $idVisiteur ID du visiteur
-     * @param String $nom        Nom du visiteur
-     * @param String $prenom     Prénom du visiteur
-     *
-     * @return null
+     * @param string $idVisiteur Identifiant unique de l'utilisateur
+     * @param string $nom        Nom de famille
+     * @param string $prenom     Prénom
      */
     public static function connecter($idVisiteur, $nom, $prenom): void
     {
@@ -46,9 +53,7 @@ abstract class Utilitaires
     }
 
     /**
-     * Détruit la session active
-     *
-     * @return null
+     * Détruit la session en cours lors de la déconnexion.
      */
     public static function deconnecter(): void
     {
@@ -56,45 +61,49 @@ abstract class Utilitaires
     }
 
     /**
-     * Transforme une date au format français jj/mm/aaaa vers le format anglais
-     * aaaa-mm-jj
-     *
-     * @param String $maDate au format  jj/mm/aaaa
-     *
-     * @return Date au format anglais aaaa-mm-jj
+     * Transforme une date française (jj/mm/aaaa) vers le format SQL anglais (aaaa-mm-jj).
+     * Cette conversion est essentielle car les bases de données SQL stockent généralement
+     * les dates au format 'aaaa-mm-jj' pour faciliter les tris et les comparaisons.
+     * 
+     * @param string $maDate La date au format jj/mm/aaaa
+     * @return string        La date au format aaaa-mm-jj
      */
     public static function dateFrancaisVersAnglais($maDate): string
     {
+        // On sépare le jour, le mois et l'année en utilisant le slash comme séparateur
         @list($jour, $mois, $annee) = explode('/', $maDate);
-        return date('Y-m-d', mktime(0, 0, 0, $mois, $jour, $annee));
+        // Utilisation de sprintf pour formater la date et s'assurer que les mois/jours
+        // sont sur deux chiffres et l'année sur quatre, comme attendu par SQL.
+        return sprintf('%04d-%02d-%02d', $annee, $mois, $jour);
     }
 
     /**
-     * Transforme une date au format format anglais aaaa-mm-jj vers le format
-     * français jj/mm/aaaa
-     *
-     * @param String $maDate au format  aaaa-mm-jj
-     *
-     * @return Date au format format français jj/mm/aaaa
+     * Transforme une date SQL anglaise (aaaa-mm-jj) vers le format français (jj/mm/aaaa).
+     * Utile pour l'affichage à l'utilisateur, qui est habitué au format français.
+     * 
+     * @param string $maDate La date au format aaaa-mm-jj
+     * @return string        La date au format jj/mm/aaaa
      */
     public static function dateAnglaisVersFrancais($maDate): string
     {
+        // On sépare l'année, le mois et le jour en utilisant le tiret
         @list($annee, $mois, $jour) = explode('-', $maDate);
-        $date = $jour . '/' . $mois . '/' . $annee;
-        return $date;
+        // Utilisation de sprintf pour formater la date dans l'ordre français.
+        return sprintf('%02d/%02d/%04d', $jour, $mois, $annee);
     }
 
     /**
-     * Retourne le mois au format aaaamm selon le jour dans le mois
+     * Extrait le mois et l'année d'une date française pour former la clé 'aaaamm'.
+     * Ce format est souvent utilisé dans l'application GSB pour identifier
+     * les fiches de frais par mois et année (ex: '27/03/2026' devient '202603').
      *
-     * @param String $date au format  jj/mm/aaaa
-     *
-     * @return String Mois au format aaaamm
+     * @param string $date La date au format jj/mm/aaaa
+     * @return string      Le mois au format aaaamm
      */
     public static function getMois($date): string
     {
         @list($jour, $mois, $annee) = explode('/', $date);
-        unset($jour);
+        // Si le mois est sur un seul chiffre (ex: '3' pour mars), on ajoute un '0' devant.
         if (strlen($mois) == 1) {
             $mois = '0' . $mois;
         }
@@ -118,61 +127,61 @@ abstract class Utilitaires
         return $lesMois[(int)$numMois];
     }
 
-    /* gestion des erreurs */
-
     /**
-     * Indique si une valeur est un entier positif ou nul
+     * Indique si une valeur est un entier positif ou nul.
+     * Utilisé pour valider les quantités de frais (ex: un nombre de repas).
      *
-     * @param Integer $valeur Valeur
-     *
-     * @return Boolean vrai ou faux
+     * @param string $valeur La valeur à tester
+     * @return bool Vrai si c'est un entier positif, faux sinon
      */
     public static function estEntierPositif($valeur): bool
     {
-        return preg_match('/[^0-9]/', $valeur) == 0;
+        return preg_match('/^[0-9]+$/', (string)$valeur);
     }
 
     /**
-     * Indique si un tableau de valeurs est constitué d'entiers positifs ou nuls
+     * Indique si un tableau de valeurs contient uniquement des entiers positifs.
+     * Utile pour vérifier tout un formulaire de frais forfaitaires d'un coup.
      *
-     * @param Array $tabEntiers Un tableau d'entier
-     *
-     * @return Boolean vrai ou faux
+     * @param array $lesValeurs Tableau de valeurs
+     * @return bool Vrai si toutes les valeurs sont des entiers positifs
      */
-    public static function estTableauEntiers($tabEntiers): bool
+    public static function estTableauEntiers($lesValeurs): bool
     {
-        $boolReturn = true;
-        foreach ($tabEntiers as $unEntier) {
-            if (!self::estEntierPositif($unEntier)) {
-                $boolReturn = false;
+        $resultat = true;
+        foreach ($lesValeurs as $uneValeur) {
+            if (!self::estEntierPositif($uneValeur)) {
+                $resultat = false;
+                break; // On s'arrête dès qu'une erreur est trouvée
             }
         }
-        return $boolReturn;
+        return $resultat;
     }
 
     /**
-     * Vérifie si une date est inférieure d'un an à la date actuelle
+     * Vérifie si une date date de plus d'un an (Règle de gestion GSB).
      *
-     * @param String $dateTestee Date à tester
-     *
-     * @return Boolean vrai ou faux
+     * @param string $dateFrais Date au format jj/mm/aaaa
+     * @return bool Vrai si périmée
      */
-    public static function estDateDepassee($dateTestee): bool
+    public static function estDateDepassee($dateFrais): bool
     {
         $dateActuelle = date('d/m/Y');
         @list($jour, $mois, $annee) = explode('/', $dateActuelle);
-        $annee--;
-        $anPasse = $annee . $mois . $jour;
-        @list($jourTeste, $moisTeste, $anneeTeste) = explode('/', $dateTestee);
-        return ($anneeTeste . $moisTeste . $jourTeste < $anPasse);
+        $anneeMoinsUn = $annee - 1;
+        $unAnPlusTot = $anneeMoinsUn . $mois . $jour;
+        
+        @list($jourF, $moisF, $anneeF) = explode('/', $dateFrais);
+        $dateAFester = $anneeF . $moisF . $jourF;
+        
+        return ($dateAFester < $unAnPlusTot);
     }
 
     /**
-     * Vérifie la validité du format d'une date française jj/mm/aaaa
+     * Vérifie si une date est valide (existe réellement dans le calendrier).
      *
-     * @param String $date Date à tester
-     *
-     * @return Boolean vrai ou faux
+     * @param string $date Date au format jj/mm/aaaa
+     * @return bool Vrai si valide
      */
     public static function estDateValide($date): bool
     {
@@ -184,7 +193,8 @@ abstract class Utilitaires
             if (!self::estTableauEntiers($tabDate)) {
                 $dateOK = false;
             } else {
-                if (!checkdate($tabDate[1], $tabDate[0], $tabDate[2])) {
+                // checkdate vérifie la validité du jour, mois, année
+                if (!checkdate((int)$tabDate[1], (int)$tabDate[0], (int)$tabDate[2])) {
                     $dateOK = false;
                 }
             }
@@ -195,9 +205,9 @@ abstract class Utilitaires
     /**
      * Vérifie que le tableau de frais ne contient que des valeurs numériques
      *
-     * @param Array $lesFrais Tableau d'entier
+     * @param array $lesFrais Tableau d'entier
      *
-     * @return Boolean vrai ou faux
+     * @return bool vrai ou faux
      */
     public static function lesQteFraisValides($lesFrais): bool
     {

@@ -5,7 +5,7 @@
 ?>
 <h2 class="h4 mb-4 border-bottom pb-2">Mes fiches de frais</h2>
 
-<div class="row">
+<div class="row mb-4">
     <div class="col-12 col-md-6 col-lg-4">
         <div class="card shadow-sm border-primary">
             <div class="card-header bg-primary text-white">

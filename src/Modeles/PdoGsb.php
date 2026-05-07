@@ -51,12 +51,17 @@ class PdoGsb
     private static $instance = null;
 
     /**
-     * Constructeur privé, crée l'instance de PDO qui sera sollicitée
-     * pour toutes les méthodes de la classe
+     * CONSTRUCTEUR PRIVE
+     * On ne peut pas instancier cette classe directement avec 'new'.
+     * C'est une règle du design pattern SINGLETON.
+     * Le constructeur crée la connexion à la base de données via l'objet PDO.
      */
     private function __construct()
     {
+        // On utilise les constantes définies dans config/bdd.php
         $this->connexion = new PDO(DB_DSN, DB_USER, DB_PWD);
+        
+        // On force l'encodage en UTF-8 pour éviter les problèmes d'accents
         $this->connexion->query('SET CHARACTER SET utf8');
     }
 
@@ -70,10 +75,14 @@ class PdoGsb
     }
 
     /**
-     * Fonction statique qui crée l'unique instance de la classe
-     * Appel : $instancePdoGsb = PdoGsb::getPdoGsb();
+     * Methode statique qui retourne l'unique instance de la classe (Singleton).
+     * Si l'instance n'existe pas encore, elle est créée. 
+     * Sinon, on retourne l'instance déjà existante.
+     * 
+     * Appel : $monPdo = PdoGsb::getPdoGsb();
      *
-     * @return l'unique objet de la classe PdoGsb
+     * @return PdoGsb L'unique objet de la classe
+     * @return PdoGsb L'unique objet de la classe PdoGsb.
      */
     public static function getPdoGsb(): PdoGsb
     {
@@ -84,15 +93,17 @@ class PdoGsb
     }
 
     /**
-     * Authentifie et retourne les informations d'un visiteur.
+     * Authentifie un utilisateur à partir de son login.
+     * Cette méthode récupère les infos de base ainsi que son rôle (Visiteur ou Comptable).
      *
-     * Si la colonne password_hash est présente: compare SHA-256; sinon fallback legacy (mdp en clair).
-     *
-     * @param string $login Login du visiteur
-     * @return array|false  Tableau ['id','nom','prenom'] si authentifié, False sinon
+     * @param string $login Le login saisi par l'utilisateur
+     * @return array        Tableau des infos [id, nom, prenom, id_role, roleLibelle]
      */
     public function getInfosVisiteur($login): array
     {
+        // Utilisation d'une requête préparée pour la sécurité (contre les injections SQL).
+        // Les requêtes préparées séparent la structure de la requête des données,
+        // empêchant ainsi l'exécution de code malveillant inséré dans les paramètres.
         $requetePrepare = $this->connexion->prepare(
             'SELECT v.id AS id, v.nom AS nom, v.prenom AS prenom, '
             . 'v.id_role AS id_role, r.libelle AS roleLibelle '
@@ -100,28 +111,38 @@ class PdoGsb
             . 'JOIN role r ON r.id = v.id_role '
             . 'WHERE v.login = :unLogin'
         );
+        
+        // On lie le paramètre nommé ':unLogin' de la requête préparée à la variable $login.
+        // PDO::PARAM_STR indique que la valeur est une chaîne de caractères,
+        // ce qui renforce la sécurité et l'intégrité des données.
         $requetePrepare->bindParam(':unLogin', $login, PDO::PARAM_STR);
         $requetePrepare->execute();
 
-        $row = $requetePrepare->fetch(PDO::FETCH_ASSOC);
-        if (!$row) {
+        // On récupère le résultat sous forme de tableau associatif.
+        // Si aucun enregistrement n'est trouvé, $ligne sera false.
+        $ligne = $requetePrepare->fetch(PDO::FETCH_ASSOC);
+        
+        if (!$ligne) {
+            // Si aucun visiteur n'est trouvé avec ce login, on retourne un tableau vide.
             return [];
         }
 
-        // Normalisation des valeurs renvoyées
-        $row['id_role'] = isset($row['id_role']) ? strtoupper(trim((string)$row['id_role'])) : null;
-        $row['roleLibelle'] = isset($row['roleLibelle']) ? trim((string)$row['roleLibelle']) : null;
+        // Nettoyage et normalisation des données avant de les retourner.
+        // Par exemple, l'ID du rôle est converti en majuscules et les espaces superflus sont supprimés.
+        $idRole = isset($ligne['id_role']) ? strtoupper(trim((string)$ligne['id_role'])) : null;
+        $libelleRole = isset($ligne['roleLibelle']) ? trim((string)$ligne['roleLibelle']) : null;
 
+        // Retourne un tableau associatif contenant les informations de l'utilisateur.
         return [
-            'id' => $row['id'],
-            'nom' => $row['nom'],
-            'prenom' => $row['prenom'],
-            'id_role' => $row['id_role'],
-            'roleLibelle' => $row['roleLibelle']
+            'id' => $ligne['id'],
+            'nom' => $ligne['nom'],
+            'prenom' => $ligne['prenom'],
+            'id_role' => $idRole,
+            'roleLibelle' => $libelleRole
         ];
     }
-    
-    public function getMdpVisiteur($login) 
+
+    public function getMdpVisiteur($login)
     {
         $requetePrepare = $this->connexion->prepare(
             'SELECT mdp '
@@ -135,42 +156,44 @@ class PdoGsb
 
     /**
      * Retourne sous forme d'un tableau associatif toutes les lignes de frais
-     * hors forfait concernées par les deux arguments.
-     * La boucle foreach ne peut être utilisée ici car on procède
-     * à une modification de la structure itérée - transformation du champ date-
+     * hors forfait pour un visiteur et un mois donnés.
+     * On convertit la date du format SQL (aaaa-mm-jj) vers le format français (jj/mm/aaaa).
      *
-     * @param String $idVisiteur ID du visiteur
-     * @param String $mois       Mois sous la forme aaaamm
-     *
-     * @return tous les champs des lignes de frais hors forfait sous la forme
-     * d'un tableau associatif
+     * @param string $idVisiteur ID du visiteur
+     * @param string $mois       Mois sous la forme aaaamm
+     * @return array             Tableau des lignes hors forfait
      */
     public function getLesFraisHorsForfait($idVisiteur, $mois): array
     {
         $requetePrepare = $this->connexion->prepare(
             'SELECT * FROM lignefraishorsforfait '
-            . 'WHERE lignefraishorsforfait.idvisiteur = :unIdVisiteur '
-            . 'AND lignefraishorsforfait.mois = :unMois'
+            . 'WHERE lignefraishorsforfait.idvisiteur = :idVisiteur '
+            . 'AND lignefraishorsforfait.mois = :mois '
+            . 'ORDER BY lignefraishorsforfait.date DESC'
         );
-        $requetePrepare->bindParam(':unIdVisiteur', $idVisiteur, PDO::PARAM_STR);
-        $requetePrepare->bindParam(':unMois', $mois, PDO::PARAM_STR);
+        $requetePrepare->bindParam(':idVisiteur', $idVisiteur, PDO::PARAM_STR);
+        $requetePrepare->bindParam(':mois', $mois, PDO::PARAM_STR);
         $requetePrepare->execute();
+        
         $lesLignes = $requetePrepare->fetchAll();
         $nbLignes = count($lesLignes);
+        
+        // On parcourt les lignes pour transformer la date en format français
         for ($i = 0; $i < $nbLignes; $i++) {
             $date = $lesLignes[$i]['date'];
             $lesLignes[$i]['date'] = Utilitaires::dateAnglaisVersFrancais($date);
         }
+        
         return $lesLignes;
     }
 
     /**
      * Retourne le nombre de justificatif d'un visiteur pour un mois donné
      *
-     * @param String $idVisiteur ID du visiteur
-     * @param String $mois       Mois sous la forme aaaamm
+     * @param string $idVisiteur ID du visiteur
+     * @param string $mois       Mois sous la forme aaaamm
      *
-     * @return le nombre entier de justificatifs
+     * @return int le nombre entier de justificatifs
      */
     public function getNbjustificatifs($idVisiteur, $mois): int
     {
@@ -187,39 +210,37 @@ class PdoGsb
     }
 
     /**
-     * Retourne sous forme d'un tableau associatif toutes les lignes de frais
-     * au forfait concernées par les deux arguments
+     * Retourne sous forme d'un tableau associatif les frais forfaitisés
+     * (Repas, Nuitée, Étape, KM) d'un visiteur pour un mois donné.
      *
-     * @param String $idVisiteur ID du visiteur
-     * @param String $mois       Mois sous la forme aaaamm
-     *
-     * @return l'id, le libelle et la quantité sous la forme d'un tableau
-     * associatif
+     * @param string $idVisiteur ID du visiteur
+     * @param string $mois       Mois sous la forme aaaamm
+     * @return array             Tableau des frais forfaitisés
      */
     public function getLesFraisForfait($idVisiteur, $mois): array
     {
         $requetePrepare = $this->connexion->prepare(
-            'SELECT fraisforfait.id as idfrais, '
-            . 'fraisforfait.libelle as libelle, '
+            'SELECT fraisforfait.id AS idfrais, fraisforfait.libelle AS libelle, '
             . 'fraisforfait.montant as montant, '
-            . 'lignefraisforfait.quantite as quantite '
+            . 'lignefraisforfait.quantite AS quantite '
             . 'FROM lignefraisforfait '
             . 'INNER JOIN fraisforfait '
             . 'ON fraisforfait.id = lignefraisforfait.idfraisforfait '
-            . 'WHERE lignefraisforfait.idvisiteur = :unIdVisiteur '
-            . 'AND lignefraisforfait.mois = :unMois '
+            . 'WHERE lignefraisforfait.idvisiteur = :idVisiteur '
+            . 'AND lignefraisforfait.mois = :mois '
             . 'ORDER BY lignefraisforfait.idfraisforfait'
         );
-        $requetePrepare->bindParam(':unIdVisiteur', $idVisiteur, PDO::PARAM_STR);
-        $requetePrepare->bindParam(':unMois', $mois, PDO::PARAM_STR);
+        $requetePrepare->bindParam(':idVisiteur', $idVisiteur, PDO::PARAM_STR);
+        $requetePrepare->bindParam(':mois', $mois, PDO::PARAM_STR);
         $requetePrepare->execute();
+        
         return $requetePrepare->fetchAll();
     }
 
     /**
      * Retourne tous les id de la table FraisForfait
      *
-     * @return un tableau associatif
+     * @return array un tableau associatif
      */
     public function getLesIdFrais(): array
     {
@@ -236,12 +257,12 @@ class PdoGsb
      * Met à jour la table ligneFraisForfait pour un visiteur et
      * un mois donné en enregistrant les nouveaux montants
      *
-     * @param String $idVisiteur ID du visiteur
-     * @param String $mois       Mois sous la forme aaaamm
-     * @param Array  $lesFrais   tableau associatif de clé idFrais et
+     * @param string $idVisiteur ID du visiteur
+     * @param string $mois       Mois sous la forme aaaamm
+     * @param array  $lesFrais   tableau associatif de clé idFrais et
      *                           de valeur la quantité pour ce frais
      *
-     * @return null
+     * @return void
      */
     public function majFraisForfait($idVisiteur, $mois, $lesFrais): void
     {
@@ -267,11 +288,11 @@ class PdoGsb
      * Met à jour le nombre de justificatifs de la table ficheFrais
      * pour le mois et le visiteur concerné
      *
-     * @param String  $idVisiteur      ID du visiteur
-     * @param String  $mois            Mois sous la forme aaaamm
-     * @param Integer $nbJustificatifs Nombre de justificatifs
+     * @param string  $idVisiteur      ID du visiteur
+     * @param string  $mois            Mois sous la forme aaaamm
+     * @param int $nbJustificatifs Nombre de justificatifs
      *
-     * @return null
+     * @return void
      */
     public function majNbJustificatifs($idVisiteur, $mois, $nbJustificatifs): void
     {
@@ -294,10 +315,10 @@ class PdoGsb
     /**
      * Teste si un visiteur possède une fiche de frais pour le mois passé en argument
      *
-     * @param String $idVisiteur ID du visiteur
-     * @param String $mois       Mois sous la forme aaaamm
+     * @param string $idVisiteur ID du visiteur
+     * @param string $mois       Mois sous la forme aaaamm
      *
-     * @return vrai ou faux
+     * @return bool vrai ou faux
      */
     public function estPremierFraisMois($idVisiteur, $mois): bool
     {
@@ -319,9 +340,9 @@ class PdoGsb
     /**
      * Retourne le dernier mois en cours d'un visiteur
      *
-     * @param String $idVisiteur ID du visiteur
+     * @param string $idVisiteur ID du visiteur
      *
-     * @return le mois sous la forme aaaamm
+     * @return string le mois sous la forme aaaamm
      */
     public function dernierMoisSaisi($idVisiteur): string
     {
@@ -345,10 +366,10 @@ class PdoGsb
      * idEtat, crée une nouvelle fiche de frais avec un idEtat à 'CR' et crée
      * les lignes de frais forfait de quantités nulles
      *
-     * @param String $idVisiteur ID du visiteur
-     * @param String $mois       Mois sous la forme aaaamm
+     * @param string $idVisiteur ID du visiteur
+     * @param string $mois       Mois sous la forme aaaamm
      *
-     * @return null
+     * @return void
      */
     public function creeNouvellesLignesFrais($idVisiteur, $mois): void
     {
@@ -383,13 +404,13 @@ class PdoGsb
      * Crée un nouveau frais hors forfait pour un visiteur un mois donné
      * à partir des informations fournies en paramètre
      *
-     * @param String $idVisiteur ID du visiteur
-     * @param String $mois       Mois sous la forme aaaamm
-     * @param String $libelle    Libellé du frais
-     * @param String $date       Date du frais au format français jj//mm/aaaa
-     * @param Float  $montant    Montant du frais
+     * @param string $idVisiteur ID du visiteur
+     * @param string $mois       Mois sous la forme aaaamm
+     * @param string $libelle    Libellé du frais
+     * @param string $date       Date du frais au format français jj//mm/aaaa
+     * @param float  $montant    Montant du frais
      *
-     * @return null
+     * @return void
      */
     public function creeNouveauFraisHorsForfait($idVisiteur, $mois, $libelle, $date, $montant): void
     {
@@ -427,9 +448,9 @@ class PdoGsb
     /**
      * Supprime le frais hors forfait dont l'id est passé en argument
      *
-     * @param String $idFrais ID du frais
+     * @param string $idFrais ID du frais
      *
-     * @return null
+     * @return void
      */
     public function supprimerFraisHorsForfait($idFrais): void
     {
@@ -456,34 +477,56 @@ class PdoGsb
     }
 
     /**
-     * Retourne l'identité d'un visiteur par son identifiant.
+     * Récupère les informations d'un visiteur à partir de son ID.
+     * Cette fonction est utilisée pour l'affichage du nom/prénom et
+     * pour connaître la puissance fiscale de son véhicule pour les KM.
      *
-     * @param string $id Identifiant du visiteur
-     * @return array     [id, nom, prenom]
+     * @param string $id Identifiant unique du visiteur
+     * @return array     Tableau contenant [id, nom, prenom, puissance]
      */
     public function getVisiteur($id): array
     {
+        // On prépare la requête SQL pour éviter les injections
         $requetePrepare = $this->connexion->prepare(
-            'SELECT id, nom, prenom FROM visiteur WHERE id = :id LIMIT 1'
+            'SELECT id, nom, prenom, puissance FROM visiteur WHERE id = :id LIMIT 1'
         );
         $requetePrepare->bindParam(':id', $id, PDO::PARAM_STR);
         $requetePrepare->execute();
+
+        // On retourne le résultat sous forme de tableau associatif
         return $requetePrepare->fetch();
     }
 
     /**
-     * Calcule le montant total d'une fiche (forfait + hors-forfait, hors REFUSE).
-     * Si le barème kilométrique est activé, remplace le calcul de la ligne 'KM'
-     * par le service d'indemnités (sinon fallback à l'unitaire de la BDD).
+     * Calcule le montant total d'une fiche de frais pour un visiteur et un mois donnés.
+     * Somme les frais forfaitisés (en appliquant le barème KM si activé) 
+     * et les frais hors-forfait (en excluant ceux qui ont été refusés).
      *
      * @param string $idVisiteur Identifiant du visiteur
      * @param string $mois       Mois au format aaaamm
-     * @return float             Montant total calculé
+     * @return float             Montant total calculé en euros
      */
     public function calculerMontantFiche($idVisiteur, $mois): float
     {
+        // On vérifie si le calcul spécial des indemnités kilométriques est actif
         $useKm = IndemniteKmService::isEnabled();
-        $puissance = IndemniteKmService::getDefaultPuissance();
+
+        // On récupère la puissance fiscale du véhicule du visiteur
+        // Si elle n'est pas renseignée en BDD, on prend celle par défaut du service
+        $requetePuissance = $this->connexion->prepare(
+            'SELECT puissance FROM visiteur WHERE id = :id'
+        );
+        $requetePuissance->bindParam(':id', $idVisiteur, PDO::PARAM_STR);
+        $requetePuissance->execute();
+        $lignePuissance = $requetePuissance->fetch();
+
+        if ($lignePuissance && !empty($lignePuissance['puissance'])) {
+            $puissanceVisible = $lignePuissance['puissance'];
+        } else {
+            $puissanceVisible = IndemniteKmService::getDefaultPuissance();
+        }
+
+        // 3. Calcul de la partie FORFAIT (Repas, Nuitée, Étape, KM)
         $reqLignes = $this->connexion->prepare(
             'SELECT lff.idfraisforfait AS idf, lff.quantite AS qte, ff.montant AS unit '
             . 'FROM lignefraisforfait lff '
@@ -493,18 +536,25 @@ class PdoGsb
         $reqLignes->bindParam(':v', $idVisiteur, PDO::PARAM_STR);
         $reqLignes->bindParam(':m', $mois, PDO::PARAM_STR);
         $reqLignes->execute();
+
         $totalForfait = 0.0;
         while ($row = $reqLignes->fetch()) {
-            $idf = isset($row['idf']) ? (string)$row['idf'] : '';
-            $qte = isset($row['qte']) ? (int)$row['qte'] : 0;
-            $unit = isset($row['unit']) ? (float)$row['unit'] : 0.0;
-            if ($idf === 'KM' && $useKm && $puissance !== null) {
-                $totalForfait += IndemniteKmService::computeMontant($qte, (int)$puissance, $unit);
+            $idFraisForfait = (string) $row['idf'];
+            $quantite = (int) $row['qte'];
+            $prixUnitaire = (float) $row['unit'];
+
+            // Règle de gestion : si c'est un frais KM, on utilise le barème de puissance
+            if ($idFraisForfait === 'KM' && $useKm) {
+                // On délègue le calcul au service spécialisé
+                $totalForfait += IndemniteKmService::computeMontant($quantite, (string) $puissanceVisible, $prixUnitaire);
             } else {
-                $totalForfait += $qte * $unit;
+                // Sinon calcul standard (quantité * prix unitaire de la table fraisforfait)
+                $totalForfait += $quantite * $prixUnitaire;
             }
         }
 
+        // 4. Calcul de la partie HORS FORFAIT
+        // On ignore les frais dont le libellé commence par "REFUSE " (Règle green-IT / Comptable)
         $reqHF = $this->connexion->prepare(
             "SELECT SUM(montant) AS totalHF FROM lignefraishorsforfait "
             . "WHERE idvisiteur = :v AND mois = :m AND libelle NOT LIKE 'REFUSE %'"
@@ -512,9 +562,14 @@ class PdoGsb
         $reqHF->bindParam(':v', $idVisiteur, PDO::PARAM_STR);
         $reqHF->bindParam(':m', $mois, PDO::PARAM_STR);
         $reqHF->execute();
-        $rowH = $reqHF->fetch();
-        $totalHF = $rowH && isset($rowH['totalHF']) ? (float)$rowH['totalHF'] : 0.0;
 
+        $ligneHF = $reqHF->fetch();
+        $totalHF = 0.0;
+        if ($ligneHF && isset($ligneHF['totalHF'])) {
+            $totalHF = (float) $ligneHF['totalHF'];
+        }
+
+        // 5. On additionne les deux parties
         return $totalForfait + $totalHF;
     }
 
@@ -539,22 +594,22 @@ class PdoGsb
     }
 
     /**
-     * Retourne les mois pour lesquel un visiteur a une fiche de frais
+     * Retourne les mois pour lesquels un visiteur a une fiche de frais.
+     * Les mois sont retournés du plus récent au plus ancien.
      *
-     * @param String $idVisiteur ID du visiteur
-     *
-     * @return un tableau associatif de clé un mois -aaaamm- et de valeurs
-     *         l'année et le mois correspondant
+     * @param string $idVisiteur ID du visiteur
+     * @return array             Tableau de mois (aaaamm)
      */
     public function getLesMoisDisponibles($idVisiteur): array
     {
         $requetePrepare = $this->connexion->prepare(
             'SELECT fichefrais.mois AS mois FROM fichefrais '
-            . 'WHERE fichefrais.idvisiteur = :unIdVisiteur '
-            . 'ORDER BY fichefrais.mois desc'
+            . 'WHERE fichefrais.idvisiteur = :idVisiteur '
+            . 'ORDER BY fichefrais.mois DESC'
         );
-        $requetePrepare->bindParam(':unIdVisiteur', $idVisiteur, PDO::PARAM_STR);
+        $requetePrepare->bindParam(':idVisiteur', $idVisiteur, PDO::PARAM_STR);
         $requetePrepare->execute();
+        
         $lesMois = array();
         while ($laLigne = $requetePrepare->fetch()) {
             $mois = $laLigne['mois'];
@@ -572,9 +627,6 @@ class PdoGsb
     /**
      * Retourne les informations d'une fiche de frais d'un visiteur pour un
      * mois donné
-     *
-     * @param String $idVisiteur ID du visiteur
-     * @param String $mois       Mois sous la forme aaaamm
      *
      * @return un tableau avec des champs de jointure entre une fiche de frais
      *         et la ligne d'état
@@ -667,6 +719,17 @@ class PdoGsb
         } else {
             $this->majEtatFicheFrais($idVisiteur, $mois, 'RB');
         }
+    }
+
+    /**
+     * Indique si les colonnes de paiement étendues existent dans la table fichefrais.
+     * Pourrait être automatisé via une requête DESCRIBE, mais fixé à false ici pour la stabilité.
+     *
+     * @return bool
+     */
+    public function hasPaiementColumns(): bool
+    {
+        return false; // Changé à true si schema étendu
     }
 
     /**

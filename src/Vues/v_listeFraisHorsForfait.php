@@ -24,6 +24,13 @@
             <div class="card-header bg-primary text-white">
                 <h5 class="card-title mb-0 fs-6">Descriptif des éléments hors forfait</h5>
             </div>
+            <?php
+            // Règle de gestion 2025 : Rappel sur la TVA et les factures acquittées
+            ?>
+            <div class="alert alert-info border-0 rounded-0 mb-0 small py-2 px-3">
+                <i class="bi bi-info-circle me-1"></i>
+                <strong>Notice 2025 :</strong> Tout frais « hors forfait » doit être dûment justifié par l’envoi d’une facture acquitée faisant apparaître le montant de TVA. Les originaux doivent être conservés 3 ans.
+            </div>
             <div class="table-responsive">
                 <table class="table table-bordered table-hover mb-0 align-middle">
                     <thead class="table-light">
